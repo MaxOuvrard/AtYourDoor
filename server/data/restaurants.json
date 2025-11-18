@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Le Bistrot du Marché",
+    "city": "Paris",
+    "image": "/images/restaurants/le-bistrot-du-marche.png"
+  },
+  {
+    "id": 2,
+    "name": "La Table Provençale",
+    "city": "Aix-en-Provence",
+    "image": "/images/restaurants/la-table-provencale.png"
+  },
+  {
+    "id": 3,
+    "name": "Chez Matteo",
+    "city": "Lyon",
+    "image": "/images/restaurants/chez-matteo.png"
+  },
+  {
+    "id": 4,
+    "name": "El Rincón Español",
+    "city": "Barcelona",
+    "image": "/images/restaurants/el-rincon-espanol.png"
+  },
+  {
+    "id": 5,
+    "name": "La Cuisine de Claire",
+    "city": "Nantes",
+    "image": "/images/restaurants/la-cuisine-de-claire.png"
+  },
+  {
+    "id": 6,
+    "name": "Sushi Hikari",
+    "city": "Tokyo",
+    "image": "/images/restaurants/sushi-hikari.png"
+  },
+  {
+    "id": 7,
+    "name": "Osteria Milano",
+    "city": "Milan",
+    "image": "/images/restaurants/osteria-milano.png"
+  },
+  {
+    "id": 8,
+    "name": "Café du Port",
+    "city": "Marseille",
+    "image": "/images/restaurants/cafe-du-port.png"
+  }
+]

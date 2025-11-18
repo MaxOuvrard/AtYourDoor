@@ -5,11 +5,11 @@
                 <img src="/images/Logo_header.png" alt="AtYourDoor" class="logo" />
             </NuxtLink>
 
-            <nav class="nav" role="navigation" aria-label="Main navigation">
-                <NuxtLink to="/restaurants" class="nav-link">Restaurants</NuxtLink>
-                <NuxtLink to="/profile" class="nav-link">Profil</NuxtLink>
-                <NuxtLink to="/commandes" class="nav-link">Commandes</NuxtLink>
-            </nav>
+                    <nav class="nav" role="navigation" aria-label="Main navigation">
+                        <NuxtLink to="/restaurants" class="nav-link">Restaurants</NuxtLink>
+                        <NuxtLink to="/profile" class="nav-link">Profil</NuxtLink>
+                        <NuxtLink to="/commandes" class="nav-link">Commandes</NuxtLink>
+                    </nav>
         </div>
     </header>
 </template>
@@ -49,12 +49,20 @@
     align-items: center;
 }
 .nav-link {
-    color: var(--muted, rgba(69,90,100,0.6));
+    /* Remonter le contraste en utilisant la variable --text plus foncée
+       (évite l'utilisation de la variante semi-transparente --muted qui baisse le contraste). */
+    color: var(--text, #0f172a);
     text-decoration: none;
     font-weight: 600;
     padding: 6px 10px;
     border-radius: 8px;
     transition: background .12s ease, color .12s ease, transform .08s ease;
+}
+.nav-link:focus-visible {
+    /* Visibilité clavier / accessibilité : outline net et offset. */
+    outline: 3px solid rgba(229,57,53,0.18); /* nuance tomate claire */
+    outline-offset: 3px;
+    border-radius: 8px;
 }
 .nav-link:hover {
     background: rgba(69,90,100,0.06);

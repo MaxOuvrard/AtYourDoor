@@ -39,7 +39,7 @@
     text-decoration: none;
 }
 .logo {
-    height: 36px;
+    height: 48px;
     width: auto;
     display: block;
 }

@@ -1,0 +1,246 @@
+:root {
+  /* Palette principale fournie par l'utilisateur */
+  --tomato: #E53935; /* rouge tomate */
+  --spice-orange: #FF8F00; /* orange épice */
+  --cream: #FFFBF4; /* blanc crème */
+  --slate: #455A64; /* gris ardoise */
+
+  /* Semantic variables (mapped to palette) */
+  --bg: var(--cream);
+  --card: #ffffff;
+  --accent: var(--tomato);
+  --accent-600: var(--spice-orange);
+  --text: var(--slate);
+  --muted: rgba(69,90,100,0.6); /* légèrement transparent pour les textes secondaires */
+  --error: #b71c1c; /* nuance d'erreur compatible avec la palette */
+  --radius: 10px;
+  --shadow: 0 6px 18px rgba(69,90,100,0.08); /* ombre plus en accord avec gris ardoise */
+  --glass: linear-gradient(180deg, rgba(255,251,244,0.9), rgba(255,251,244,0.7));
+}
+
+/* Reset small parts to look consistent inside app scope */
+html, body, #__nuxt, #app {
+  height: 100%;
+}
+
+/* Page background and centering */
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  /* Doux accents tomate + orange en arrière-plan, tonalité très discrète */
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(229,57,53,0.06), rgba(255,143,0,0.03) 20%), var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.login-container > form {
+  width: 100%;
+  max-width: 420px;
+  /* Slightly more opaque cream + subtle gradient for better contrast */
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,251,244,0.96));
+  border-radius: calc(var(--radius) + 4px);
+  /* stronger shadow to lift the card above the busy background */
+  box-shadow: 0 14px 40px rgba(12,14,20,0.18);
+  padding: 28px 28px;
+  box-sizing: border-box;
+  border: 1px solid rgba(15,23,42,0.12);
+  /* subtle backdrop blur helps separate the card from background images */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+  z-index: 30; /* ensure it's above overlay and carousel */
+}
+
+.login-container h1 {
+  margin: 0 0 18px 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+label {
+  font-size: 13px;
+  color: #000; /* labels in black for better contrast */
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #aaaaaa; /* default border black for stronger contrast */
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,251,244,0.96));
+  box-sizing: border-box;
+  transition: box-shadow 150ms ease, border-color 150ms ease, transform 80ms ease;
+}
+ 
+    /* darker inner shade to clearly indicate editable fields */
+input[type="text"],
+input[type="password"] {
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.10);
+  /* slightly darker background to emphasize input area */
+  background: linear-gradient(180deg, rgba(245,245,245,0.95), rgba(235,235,235,0.95));
+  color: var(--text);
+}
+
+/* Placeholder styling: slightly muted but readable */
+input::placeholder {
+  color: rgba(15,23,42,0.55);
+  opacity: 1; /* ensure consistent visibility across browsers */
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 6px 18px rgba(69,90,100,0.10);
+  transform: translateY(-1px);
+}
+
+.form-group > .loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(69,90,100,0.08);
+  border-top-color: var(--accent);
+  display: inline-block;
+  box-sizing: border-box;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  /* Dégradé chaud : tomate -> orange épice */
+  background: linear-gradient(180deg, var(--accent), var(--accent-600));
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(69,90,100,0.10);
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+button[type="submit"]:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+
+/* error message styling (the template sets inline color using var(--error) fallback) */
+.form-group.error {
+  color: var(--error);
+  font-weight: 600;
+}
+
+/* small screens adjustments */
+@media (max-width: 480px) {
+  .login-container > form {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .login-container h1 {
+    font-size: 20px;
+  }
+}
+
+/* Utility: visually-hidden for screen readers if needed later */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
+/* Minor touch target improvements */
+input[type="text"], input[type="password"], button[type="submit"] {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+/* Background carousel for index page */
+.bg-carousel {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-carousel .slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 900ms ease, transform 900ms ease;
+}
+
+.bg-carousel .slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.bg-carousel .slide { animation-delay: 0s; }
+
+.bg-carousel .bg-overlay {
+  position: absolute;
+  inset: 0;
+  /* léger voile noir à 20% pour assombrir les photos */
+  background: rgba(0,0,0,0.20);
+  pointer-events: none;
+}
+
+/* (no keyframes required — transitions are used with JS-controlled active class) */
+
+/* Ensure login content remains above the carousel */
+.page-root { position: relative; }
+.login-container { position: relative; z-index: 10; }
+
+/* Prevent body scrolling while index page is mounted */
+body.no-scroll { overflow: hidden; }

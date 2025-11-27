@@ -3,48 +3,63 @@
     "id": 1,
     "name": "Le Bistrot du Marché",
     "city": "Paris",
-    "image": "/images/restaurants/le-bistrot-du-marche.png"
+    "image": "/images/restaurants/le-bistrot-du-marche.png",
+    "category": "français"
   },
   {
     "id": 2,
     "name": "La Table Provençale",
     "city": "Aix-en-Provence",
-    "image": "/images/restaurants/la-table-provencale.png"
+    "image": "/images/restaurants/la-table-provencale.png",
+    "category": "français"
   },
   {
     "id": 3,
     "name": "Chez Matteo",
     "city": "Lyon",
-    "image": "/images/restaurants/chez-matteo.png"
+    "image": "/images/restaurants/chez-matteo.png",
+    "category": "pizza"
   },
   {
     "id": 4,
     "name": "El Rincón Español",
     "city": "Barcelona",
-    "image": "/images/restaurants/el-rincon-espanol.png"
+    "image": "/images/restaurants/el-rincon-espanol.png",
+    "category": "tapas"
   },
   {
     "id": 5,
     "name": "La Cuisine de Claire",
     "city": "Nantes",
-    "image": "/images/restaurants/la-cuisine-de-claire.png"
+    "image": "/images/restaurants/la-cuisine-de-claire.png",
+    "category": "sandwich"
   },
   {
     "id": 6,
     "name": "Sushi Hikari",
     "city": "Tokyo",
-    "image": "/images/restaurants/sushi-hikari.png"
+    "image": "/images/restaurants/sushi-hikari.png",
+    "category": "asiatique"
   },
   {
     "id": 7,
     "name": "Osteria Milano",
     "city": "Milan",
-    "image": "/images/restaurants/osteria-milano.png"
+    "image": "/images/restaurants/osteria-milano.png",
+    "category": "pizza"
   },
   {
     "id": 8,
     "name": "Café du Port",
     "city": "Marseille",
-    "image": "/images/restaurants/cafe-du-port.png"
+    "image": "/images/restaurants/cafe-du-port.png",
+    "category": "burger"
+  },
+  {
+    "id": 9,
+    "name": "Le Freti",
+    "city": "Nézel",
+    "image": "",
+    "category": "français"
   }
 ]

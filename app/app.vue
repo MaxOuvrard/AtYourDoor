@@ -1,6 +1,9 @@
 <script setup lang="ts">
-const config = useRuntimeConfig();
+import { useUserStore } from '../stores/userStore'
+const userStore = useUserStore()
+userStore.initUserFromStorage()
 
+const config = useRuntimeConfig();
 console.log(config.public.apiUrl);
 </script>
 <template>

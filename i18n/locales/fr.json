@@ -1,0 +1,69 @@
+		
+	{
+	"hello": "Bonjour",
+	"welcome": "Bienvenue sur AtYourDoor !",
+	"access_restaurants": "Accéder aux restaurants",
+	"home_title": "AtYourDoor, la plateforme numéro 1 de livraisons de repas à domicile, partout dans le monde",
+	"header": {
+		"home": "Accueil",
+		"restaurants": "Restaurants",
+		"profile": "Profil",
+		"orders": "Commandes",
+		"admin": "Restaurateur",
+		"my_restaurant": "Mon restaurant",
+		"my_dishes": "Mes plats",
+		"logout": "Déconnexion",
+		"login": "Se connecter",
+		"register": "Créer un compte",
+		"toggle_lang": "Changer de langue"
+	}
+	,
+	"login": {	
+		"title": "Se connecter",
+		"username": "Nom d'utilisateur :",
+		"username_placeholder": "Entrez votre nom d'utilisateur",
+		"password": "Mot de passe :",
+		"password_placeholder": "Entrez votre mot de passe",
+		"signing_in": "Connexion en cours…",
+		"logging_in": "Connexion...",
+		"login_btn": "Connexion"
+	}
+	,
+	"admin": {
+		"add_restaurant": "Ajouter un restaurant",
+		"title": "Gestion des restaurants",
+		"image": "Image",
+		"name": "Nom",
+		"city": "Ville",
+		"category": "Catégorie",
+		"actions": "Actions",
+		"delete_error": "Erreur lors de la suppression."
+		, "delete": "Supprimer"
+		, "confirm_delete_title": "Confirmer la suppression"
+		, "confirm_delete_text": "Voulez-vous vraiment supprimer ce restaurant ? Cette action est irréversible."
+		, "cancel": "Annuler"
+		, "none_found": "Aucun restaurant trouvé."
+	},
+
+    "mesplats": {
+		"title": "Mes plats",
+		"add": "Ajouter un plat",
+		"loading": "Chargement...",
+		"network_error": "Erreur réseau.",
+		"load_error": "Erreur lors du chargement des plats.",
+		"not_authenticated": "Utilisateur non authentifié.",
+		"none_found": "Aucun plat trouvé pour votre restaurant."
+    },
+	"commandes": {
+		"title": "Mes Commandes",
+		"quantity": "Quantité :"
+	},
+		"owner": {
+			"title": "Mon Restaurant",
+			"name_placeholder": "Nom du restaurant",
+			"address_placeholder": "Adresse",
+			"postal_placeholder": "Code postal",
+			"city_placeholder": "Ville",
+			"update_btn": "Modifier"
+		}
+}

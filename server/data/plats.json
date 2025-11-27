@@ -1,0 +1,138 @@
+[
+  {
+    "id": 1,
+    "name": "Entrecôte & frites",
+    "description": "Entrecôte grillée, beurre maître d'hôtel, servie avec frites maison.",
+    "price": 19.5,
+    "id_restaurant": 1,
+    "image": "/images/plats/entrecote-frites.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Salade du marché",
+    "description": "Salade croquante aux légumes de saison, vinaigrette citronnée.",
+    "price": 11,
+    "id_restaurant": 1,
+    "image": "/images/plats/salade-du-marche.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Ratatouille provençale",
+    "description": "Légumes mijotés à l'huile d'olive, herbes de Provence.",
+    "price": 13.5,
+    "id_restaurant": 2,
+    "image": "/images/plats/ratatouille-provencale.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Filet de dorade",
+    "description": "Filet de dorade rôti, sauce tomates confites et olives.",
+    "price": 17,
+    "id_restaurant": 2,
+    "image": "/images/plats/filet-dorade.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Tagliatelles al ragù",
+    "description": "Pâtes fraîches maison nappées d'un ragù traditionnel.",
+    "price": 14.5,
+    "id_restaurant": 3,
+    "image": "/images/plats/tagliatelles-ragu.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Pizza Margherita",
+    "description": "Base tomate, mozzarella fior di latte, basilic frais.",
+    "price": 10.5,
+    "id_restaurant": 3,
+    "image": "/images/plats/pizza-margherita.jpg"
+  },
+  {
+    "id": 7,
+    "name": "Paella mixta",
+    "description": "Paella traditionnelle aux fruits de mer et poulet.",
+    "price": 20,
+    "id_restaurant": 4,
+    "image": "/images/plats/paella-mixta.jpg"
+  },
+  {
+    "id": 8,
+    "name": "Tortilla española",
+    "description": "Omelette aux pommes de terre et oignons, cuisson lente.",
+    "price": 9.5,
+    "id_restaurant": 4,
+    "image": "/images/plats/tortilla-espanola.jpg"
+  },
+  {
+    "id": 9,
+    "name": "Poulet rôti",
+    "description": "Poulet fermier rôti, jus réduit et légumes glacés.",
+    "price": 16,
+    "id_restaurant": 5,
+    "image": "/images/plats/poulet-roti.jpg"
+  },
+  {
+    "id": 10,
+    "name": "Tarte Tatin",
+    "description": "Tarte tatin aux pommes caramélisées, crème fraîche.",
+    "price": 7.5,
+    "id_restaurant": 5,
+    "image": "/images/plats/tarte-tatin.jpg"
+  },
+  {
+    "id": 11,
+    "name": "Assortiment de sushis",
+    "description": "Sélection de nigiri, maki et hosomaki, wasabi et sauce soja.",
+    "price": 21,
+    "id_restaurant": 6,
+    "image": "/images/plats/assortiment-sushis.jpg"
+  },
+  {
+    "id": 12,
+    "name": "Sashimi saumon",
+    "description": "Tranches de saumon frais, huile de sésame et gingembre mariné.",
+    "price": 15,
+    "id_restaurant": 6,
+    "image": "/images/plats/sashimi-saumon.jpg"
+  },
+  {
+    "id": 13,
+    "name": "Risotto alla milanese",
+    "description": "Risotto crémeux au safran et parmesan râpé.",
+    "price": 16.5,
+    "id_restaurant": 7,
+    "image": "/images/plats/risotto-milanese.jpg"
+  },
+  {
+    "id": 14,
+    "name": "Lasagne al forno",
+    "description": "Lasagnes gratinées au four, béchamel et ragù de bœuf.",
+    "price": 14,
+    "id_restaurant": 7,
+    "image": "/images/plats/lasagne-al-forno.jpg"
+  },
+  {
+    "id": 15,
+    "name": "Moules marinières",
+    "description": "Moules cuites au vin blanc, échalotes et persil, frites en accompagnement.",
+    "price": 13.5,
+    "id_restaurant": 8,
+    "image": "/images/plats/moules-mariniere.jpg"
+  },
+  {
+    "id": 16,
+    "name": "Croque-monsieur",
+    "description": "Pain de mie, jambon, emmental fondu, gratiné au four.",
+    "price": 8.5,
+    "id_restaurant": 8,
+    "image": "/images/plats/croque-monsieur.jpg"
+  },
+  {
+    "id": 17,
+    "name": "Croque-monsieur",
+    "description": "Pain de mie, jambon, emmental fondu, gratiné au four.",
+    "price": 8.5,
+    "id_restaurant": 9,
+    "image": "/images/plats/croque-monsieur.jpg"
+  }
+]

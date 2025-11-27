@@ -1,0 +1,23 @@
+{
+  "name": "AtYourDoor",
+  "short_name": "AYD",
+  "description": "Application de livraison de repas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait",
+  "lang": "fr-FR",
+  "icons": [
+    {
+      "src": "/public/images/home/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/public/images/home/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -131,8 +131,10 @@
     "id": 17,
     "name": "Croque-monsieur",
     "description": "Pain de mie, jambon, emmental fondu, gratiné au four.",
-    "price": 8.5,
+    "price": 15,
     "id_restaurant": 9,
-    "image": "/images/plats/croque-monsieur.jpg"
+    "image": "/images/plats/croque-monsieur.jpg",
+    "available": false,
+    "category": "français"
   }
 ]

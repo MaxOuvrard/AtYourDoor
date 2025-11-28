@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const { name, email, password, role } = body
 
   if (!name || !email || !password || !role) {
-    return { error: 'Tous les champs sont obligatoires.' }
+    return { error: 'register.errors.missing_fields' }
   }
 
   // Charger les utilisateurs existants
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
 
   // Vérifier si l'email existe déjà
   if (users.some((u: any) => u.email === email)) {
-    return { error: 'Cet email est déjà utilisé.' }
+    return { error: 'register.errors.email_exists' }
   }
 
   // Créer le nouvel utilisateur

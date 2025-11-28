@@ -16,6 +16,7 @@
     }
   ],
   "compilerOptions": {
-    "types": ["vitest"]
+    "types": ["vitest"],
+    "strict": true
   }
 }

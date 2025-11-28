@@ -11,28 +11,28 @@ interface User {
 interface Restaurant {
   id: number;
   name: string;
-  // ...autres champs
 }
 
 interface Plat {
   id: number;
   name: string;
   price: number;
-  // ...autres champs
+  id_restaurant?: number;
+  image?: string;
+  category?: string;
 }
 
 interface Commande {
   id: number;
   plats: Plat[];
   total: number;
-  // ...autres champs
 }
 
 export const useGlobalStore = defineStore('global', {
   state: () => ({
     user: null as User | null,
     isAuthenticated: false,
-    panier: [] as Plat[],
+    panier: (typeof window !== 'undefined' && localStorage.getItem('panier')) ? JSON.parse(localStorage.getItem('panier') as string) as Plat[] : [] as Plat[],
     commandes: [] as Commande[],
     restaurants: [] as Restaurant[],
   }),
@@ -50,12 +50,15 @@ export const useGlobalStore = defineStore('global', {
     // Panier
     ajouterAuPanier(plat: Plat) {
       this.panier.push(plat);
+      if (typeof window !== 'undefined') localStorage.setItem('panier', JSON.stringify(this.panier));
     },
     retirerDuPanier(platId: number) {
       this.panier = this.panier.filter(p => p.id !== platId);
+      if (typeof window !== 'undefined') localStorage.setItem('panier', JSON.stringify(this.panier));
     },
     viderPanier() {
       this.panier = [];
+      if (typeof window !== 'undefined') localStorage.removeItem('panier');
     },
     // Commandes
     ajouterCommande(commande: Commande) {

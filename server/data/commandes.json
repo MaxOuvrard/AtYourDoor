@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1764365448251,
+    "name": "oui",
+    "userId": 1764188171349,
+    "id_restaurant": 9,
+    "plats": [
+      {
+        "id": 17,
+        "name": "Croque-monsieur",
+        "price": 15,
+        "quantity": 1
+      },
+      {
+        "id": 17,
+        "name": "Croque-monsieur",
+        "price": 15,
+        "quantity": 1
+      }
+    ],
+    "total": 30,
+    "status": "preparing",
+    "createdAt": "2025-11-28T21:30:48.251Z",
+    "updatedAt": "2025-11-28T21:48:16.372Z"
+  },
+  {
+    "id": 1764367173020,
+    "name": "non",
+    "userId": 1764188171349,
+    "id_restaurant": 3,
+    "plats": [
+      {
+        "id": 5,
+        "name": "Tagliatelles al ragù",
+        "price": 15.5,
+        "quantity": 1
+      }
+    ],
+    "total": 15.5,
+    "status": "pending",
+    "createdAt": "2025-11-28T21:59:33.020Z",
+    "updatedAt": "2025-11-28T21:59:33.023Z"
+  }
+]

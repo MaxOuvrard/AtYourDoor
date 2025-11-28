@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// middleware expects NavigationGuard types in TS; cast string to any to keep runtime behavior
+definePageMeta({ middleware: ('auth' as unknown) as any })
 
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, watch } from "vue";
+import { defineAsyncComponent } from 'vue'
+import LazyImage from '~/components/LazyImage.vue'
 import type { Restaurant } from "~/modules/restaurant/types";
 import type { Plat } from "~/modules/plat/types";
+import useResource from '~/composables/useResource'
 import "~/assets/css/style.css";
 
 import { useSeoMeta } from 'nuxt/app';
@@ -12,9 +15,10 @@ const route = useRoute();
 const restaurantId = Number(route.params.restaurant_id);
 
 
-const { data: restaurant, pending: pendingRestaurant, error: errorRestaurant } = await useAsyncData<Restaurant | null>(
+const { data: restaurant, pending: pendingRestaurant, error: errorRestaurant, refresh: refreshRestaurant } = await useResource<Restaurant | null>(
   `restaurant-${restaurantId}`,
-  () => $fetch(`/api/restaurants/${restaurantId}`)
+  () => $fetch(`/api/restaurants/${restaurantId}`),
+  null
 );
 
 // SEO dynamique selon les données du restaurant
@@ -35,9 +39,10 @@ watch(
   { immediate: true }
 );
 
-const { data: plats, pending: pendingPlats, error: errorPlats } = await useAsyncData<Plat[]>(
+const { data: plats, pending: pendingPlats, error: errorPlats, refresh: refreshPlats } = await useResource<Plat[]>(
   `plats`,
-  () => $fetch("/api/plats")
+  () => $fetch("/api/plats"),
+  []
 );
 
 const platsForRestaurant = computed(() => {
@@ -47,6 +52,14 @@ const platsForRestaurant = computed(() => {
 
 <template>
   <Header />
+  <div v-if="errorRestaurant || errorPlats" class="fetch-error" style="padding:12px; text-align:center; color:var(--error);">
+    <div v-if="errorRestaurant">Erreur lors du chargement du restaurant : {{ errorRestaurant.message || errorRestaurant }}</div>
+    <div v-if="errorPlats">Erreur lors du chargement des plats : {{ errorPlats.message || errorPlats }}</div>
+    <div style="margin-top:8px;">
+      <button @click="refreshRestaurant?.()">Réessayer restaurant</button>
+      <button @click="refreshPlats?.()" style="margin-left:8px;">Réessayer plats</button>
+    </div>
+  </div>
   <div class="back-btn-wrapper">
     <button class="btn-primary" @click="router.push('/restaurants')">
       <span class="arrow-left">&#8592;</span>
@@ -54,10 +67,10 @@ const platsForRestaurant = computed(() => {
     </button>
   </div>
   <section v-if="restaurant" class="restaurant-page">
-    <div class="restaurant-card">
-      <div class="restaurant-image-wrapper">
-        <img :src="restaurant.image" :alt="restaurant.name" class="restaurant-image" />
-      </div>
+        <div class="restaurant-card">
+        <div class="restaurant-image-wrapper">
+          <LazyImage :src="restaurant.image" :alt="restaurant.name" />
+        </div>
       <div class="restaurant-info">
         <h1 class="restaurant-title">{{ restaurant.name }}</h1>
         <p class="restaurant-city">{{ restaurant.city }}</p>

@@ -51,4 +51,39 @@ describe('userStore', () => {
     expect(global.localStorage.removeItem).toHaveBeenCalledWith('user')
     expect(global.localStorage.removeItem).toHaveBeenCalledWith('token')
   })
+
+  it('initUserFromStorage reads from localStorage', () => {
+    ;(global.localStorage.getItem as any).mockImplementation((key: string) => {
+      if (key === 'user') return JSON.stringify({ id: 5, name: 'Alice' })
+      if (key === 'token') return 'tok123'
+      return null
+    })
+    const store = useUserStore()
+    // clear initial state then call init
+    store.user = null
+    store.token = ''
+    store.initUserFromStorage()
+    expect(store.user).toEqual({ id: 5, name: 'Alice' })
+    expect(store.token).toBe('tok123')
+  })
+
+  it('setName updates user and localStorage', () => {
+    const store = useUserStore()
+    store.user = { id: 2, name: 'Old' } as any
+    store.setName('New')
+    expect(store.user!.name).toBe('New')
+    expect(global.localStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify(store.user))
+  })
+
+  it('login sets token and user from $fetch response', async () => {
+    const mocked = { token: 'tok-xyz', user: { id: 9, name: 'Bob' } }
+    ;(global.$fetch as any).mockResolvedValueOnce(mocked)
+    const store = useUserStore()
+    const res = await store.login('u', 'p')
+    expect(res).toEqual(mocked)
+    expect(store.token).toBe('tok-xyz')
+    expect(store.user).toEqual({ id: 9, name: 'Bob' })
+    expect(global.localStorage.setItem).toHaveBeenCalledWith('token', 'tok-xyz')
+    expect(global.localStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify({ id: 9, name: 'Bob' }))
+  })
 })

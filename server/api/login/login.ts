@@ -8,19 +8,19 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { username, password } = body
     if (!username || !password) {
-        return { error: 'Champs manquants.' }
+        return { error: 'login.errors.missing_fields' }
     }
     let users = []
     try {
         const data = await fs.readFile(USERS_PATH, 'utf-8')
         users = JSON.parse(data)
     } catch (e) {
-        return { error: 'Erreur serveur.' }
+        return { error: 'login.errors.server' }
     }
     // username = email
     const user = users.find((u: any) => u.email === username && u.password === password)
     if (!user) {
-        return { error: 'Identifiants invalides.' }
+        return { error: 'login.errors.invalid_credentials' }
     }
     // Générer un token simple (à remplacer par JWT en prod)
     const token = Buffer.from(user.email + Date.now()).toString('base64')

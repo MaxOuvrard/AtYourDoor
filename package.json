@@ -7,7 +7,12 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "images:convert": "node ./tools/convert-images.js",
+    "test:unit": "vitest",
+    "test:e2e:install": "npx playwright install --with-deps",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed"
   },
   "dependencies": {
     "@nuxtjs/i18n": "^10.2.1",
@@ -20,8 +25,11 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@types/node": "^24.10.1",
+    "happy-dom": "^9.20.3",
     "vite-plugin-bundle-analyzer": "^0.0.1",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.14",
+    "sharp": "^0.32.0"
   }
 }

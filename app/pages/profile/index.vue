@@ -26,6 +26,8 @@
     </div>
 </template>
 <script setup lang="ts">
+// middleware expects NavigationGuard types in TS; cast string to any to keep runtime behavior
+definePageMeta({ middleware: ('auth' as unknown) as any })
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '../../../stores/userStore'
 

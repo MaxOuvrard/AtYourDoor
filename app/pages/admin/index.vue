@@ -1,5 +1,7 @@
 
 <script setup lang="ts">
+// middleware expects NavigationGuard types in TS; cast string to any to keep runtime behavior
+definePageMeta({ middleware: ('auth' as unknown) as any })
 import type { Restaurant } from "../../modules/restaurant/types";
 import { useUserStore } from "../../../stores/userStore";
 import { storeToRefs } from "pinia";
@@ -33,6 +35,7 @@ function askDelete(id: number) {
 }
 
 function removeRestaurantFromList(id: number) {
+  import LazyImage from '~/components/LazyImage.vue'
   if (restaurants.value) {
     restaurants.value = restaurants.value.filter(r => r.id !== id);
   }
@@ -83,7 +86,7 @@ function cancelDelete() {
       <tbody>
         <tr v-for="restaurant in restaurants" :key="restaurant.id" style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px 8px;">
-            <img :src="restaurant.image" :alt="restaurant.name" style="width: 60px; height: 40px; object-fit: cover; border-radius: 8px; background: #f7f7f7; border: 1px solid #eee;" />
+            <LazyImage :src="restaurant.image" :alt="restaurant.name" />
           </td>
           <td style="padding: 10px 8px; font-weight: 600;">{{ restaurant.name }}</td>
           <td style="padding: 10px 8px;">{{ restaurant.city }}</td>

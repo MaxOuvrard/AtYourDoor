@@ -2,6 +2,7 @@
 
 import type { Restaurant } from "../../modules/restaurant/types";
 import { useSeoMeta } from 'nuxt/app';
+import useResource from '~/composables/useResource'
 
 useSeoMeta({
   title: 'Restaurants - AtYourDoor',
@@ -12,11 +13,14 @@ useSeoMeta({
   twitterCard: 'summary_large_image'
 });
 
-const { data: restaurants } = await useAsyncData("restaurants", () =>
-  $fetch<Restaurant[]>("/api/restaurants")
+const { data: restaurants, error: restaurantsError, refresh } = await useResource<Restaurant[]>(
+  "restaurants",
+  () => $fetch<Restaurant[]>('/api/restaurants'),
+  []
 );
 
-import { ref, computed } from 'vue';
+import { ref, computed, defineAsyncComponent } from 'vue';
+const RestaurantItem = defineAsyncComponent(() => import('~/components/RestaurantItem.vue'))
 const search = ref("");
 // Générer dynamiquement les catégories à partir des données
 import { computed as vueComputed } from 'vue';
@@ -59,6 +63,10 @@ const filteredRestaurants = computed(() => {
 
 <template>
   <Header/>
+  <div v-if="restaurantsError" class="fetch-error" style="padding:12px; text-align:center; color:var(--error);">
+    <div>Erreur lors du chargement des restaurants : {{ restaurantsError.message || restaurantsError }}</div>
+    <button @click="refresh" style="margin-top:8px;">Réessayer</button>
+  </div>
   <div class="search-bar-container">
     <div class="search-bar">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

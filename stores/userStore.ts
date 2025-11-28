@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { apiFetch } from '../utils/api'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -20,7 +21,7 @@ export const useUserStore = defineStore('user', {
     },
 
     async login(username: string, password: string) {
-      const res = await $fetch('/api/login/login', {
+      const res = await apiFetch('/api/login/login', {
         method: 'POST',
         body: { username, password }
       })
@@ -36,7 +37,7 @@ export const useUserStore = defineStore('user', {
     },
 
     async register(name: string, email: string, password: string, role: string) {
-      const res = await $fetch('/api/login/register', {
+      const res = await apiFetch('/api/login/register', {
         method: 'POST',
         body: { name, email, password, role }
       })
@@ -55,7 +56,7 @@ export const useUserStore = defineStore('user', {
     ,
 
     async update({ email, name, password }: { email: string, name: string, password: string }) {
-      const res = await $fetch('/api/profile/update', {
+      const res = await apiFetch('/api/profile/update', {
         method: 'POST',
         body: { email, name, password },
         headers: {
@@ -68,6 +69,12 @@ export const useUserStore = defineStore('user', {
         if (typeof window !== 'undefined') localStorage.setItem('user', JSON.stringify((res as any).user))
       }
       return res
+    }
+    ,
+    setName(name: string) {
+      if (!this.user) return
+      this.user.name = name
+      if (typeof window !== 'undefined') localStorage.setItem('user', JSON.stringify(this.user))
     }
   }
 })

@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Plat } from "~/modules/plat/types";
+import { useGlobalStore } from '../../stores/globalStore'
+import { useUserStore } from '../../stores/userStore'
+import { storeToRefs } from 'pinia'
+import { computed as vueComputed } from 'vue'
 
 const props = defineProps<{
   plat: Plat;
+  to?: string;
+  showActions?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'delete', id: number): void
 }>();
 
 const cardStyle = computed(() => ({
@@ -11,20 +21,32 @@ const cardStyle = computed(() => ({
   backgroundSize: 'cover',
   backgroundPosition: 'center',
 }));
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
+const isUser = vueComputed(() => user.value?.role === 'USER')
+function addToCart() {
+  globalStore.ajouterAuPanier(props.plat as any)
+}
 </script>
 
 <template>
   <li class="plat-item">
-    <NuxtLink :to="`/plats/${props.plat.id}`" class="plat-link" :aria-label="props.plat.name">
+    <div class="plat-wrapper">
+      <NuxtLink :to="props.to ? props.to : `/plats/${props.plat.id}`" class="plat-link" :aria-label="props.plat.name">
       <div class="plat-card" :style="cardStyle">
         <div class="card-overlay">
           <div class="card-text">
             <h2 class="plat-name">{{ props.plat.name }}</h2>
             <p class="plat-price">{{ props.plat.price }} €</p>
           </div>
+          <button v-if="isUser" class="add-cart-btn" @click.prevent="addToCart" aria-label="Ajouter au panier">+</button>
         </div>
       </div>
-    </NuxtLink>
+      </NuxtLink>
+      <button v-if="props.showActions" class="delete-btn" @click.prevent="emit('delete', props.plat.id)" aria-label="Supprimer">×</button>
+    </div>
   </li>
 </template>
 
@@ -56,6 +78,24 @@ const cardStyle = computed(() => ({
   display: block;
 }
 
+.plat-wrapper { position: relative; }
+.delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  color: var(--error);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(12,14,20,0.08);
+}
+.delete-btn:hover { transform: translateY(-2px); }
+
 .plat-card:hover {
   transform: translateY(-3px) scale(1.01);
   box-shadow: 0 8px 22px rgba(15,23,42,0.10);
@@ -75,6 +115,22 @@ const cardStyle = computed(() => ({
   color: #fff;
   backdrop-filter: blur(2px);
 }
+
+.add-cart-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  color: var(--accent, #E53935);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(12,14,20,0.08);
+}
+.add-cart-btn:hover { transform: translateY(-2px); }
 
 .plat-name {
   margin: 0 0 4px 0;

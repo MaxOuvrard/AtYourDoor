@@ -1,7 +1,10 @@
 <script setup lang="ts">
+// middleware expects NavigationGuard types in TS; cast string to any to keep runtime behavior
+definePageMeta({ middleware: ('auth' as unknown) as any })
 import { ref } from 'vue';
 import { useUserStore } from '../../../stores/userStore';
 import { useRouter } from 'vue-router';
+import LazyImage from '~/components/LazyImage.vue'
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -13,9 +16,11 @@ const image = ref<File|null>(null);
 const imagePreview = ref('');
 const error = ref('');
 const loading = ref(false);
+const success = ref('');
 
 async function ajouterPlat() {
   error.value = '';
+  success.value = '';
   if (!name.value || !description.value || price.value === null || !image.value) {
     error.value = 'Tous les champs sont obligatoires.';
     return;
@@ -40,14 +45,14 @@ async function ajouterPlat() {
     if (!res.ok) {
       error.value = data.error || 'Erreur lors de l\'ajout du plat.';
     } else {
-      // Afficher un message de succès, ne pas rediriger
-      error.value = '';
-      name.value = '';
-      description.value = '';
-      price.value = null;
-      image.value = null;
-      imagePreview.value = '';
-      alert('Plat ajouté avec succès !');
+        // Afficher un message de succès dans le formulaire (pas d'alert)
+        error.value = '';
+        success.value = 'Plat ajouté avec succès !';
+        name.value = '';
+        description.value = '';
+        price.value = null;
+        image.value = null;
+        imagePreview.value = '';
     }
   } catch (e) {
     error.value = 'Erreur réseau.';
@@ -72,36 +77,37 @@ function onImageChange(e: Event) {
 
 <template>
     <Header/>
-    <div class="back-btn-wrapper">
-    <button class="btn-primary" @click="router.push('/plats/mesplats')">
-      <span class="arrow-left">&#8592;</span>
-      <span class="btn-text">Retour</span>
-    </button>
-    </div>
     <div class="ajouter-plat-container">
+      <div class="back-btn-wrapper">
+        <button class="btn-primary" @click="router.push('/plats/mesplats')">
+          <span class="arrow-left">&#8592;</span>
+          <span class="btn-text">{{ $t('ajouterPlat.retour') }}</span>
+        </button>
+      </div>
       <form @submit.prevent="ajouterPlat" class="ajouter-plat-form">
-        <h1>Ajouter un plat</h1>
+        <h1>{{ $t('ajouterPlat.titre') }}</h1>
         <div>
-          <label for="name">Nom du plat</label>
+          <label for="name">{{ $t('ajouterPlat.nom') }}</label>
           <input id="name" v-model="name" type="text" required />
         </div>
         <div>
-          <label for="description">Description</label>
+          <label for="description">{{ $t('ajouterPlat.description') }}</label>
           <textarea id="description" v-model="description" required class="no-padding"></textarea>
         </div>
         <div>
-          <label for="price">Prix (€)</label>
+          <label for="price">{{ $t('ajouterPlat.prix') }}</label>
           <input id="price" v-model.number="price" type="number" min="0" step="0.01" required />
         </div>
         <div>
-          <label for="image">Image (fichier)</label>
+          <label for="image">{{ $t('ajouterPlat.image') }}</label>
           <input id="image" type="file" accept="image/*" @change="onImageChange" required class="input-style file-input" />
           <div v-if="imagePreview" style="margin-top:10px;">
-            <img :src="imagePreview" alt="Aperçu" style="max-width:100%;max-height:120px;border-radius:8px;" />
+            <LazyImage :src="imagePreview" :alt="$t('ajouterPlat.apercu')" style="max-width:100%;max-height:120px;border-radius:8px;" />
           </div>
         </div>
         <div v-if="error" class="error">{{ error }}</div>
-        <button type="submit" :disabled="loading">{{ loading ? 'Ajout en cours...' : 'Ajouter' }}</button>
+        <div v-if="success" class="success">{{ success }}</div>
+        <button type="submit" :disabled="loading">{{ loading ? $t('ajouterPlat.ajoutEnCours') : $t('ajouterPlat.ajouter') }}</button>
       </form>
     </div>
 </template>
@@ -109,11 +115,13 @@ function onImageChange(e: Event) {
 
 <style scoped>
 .ajouter-plat-container {
-  min-height: 100vh;
+  height: 100vh;
+  box-sizing: border-box;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 24px;
 }
 
 .ajouter-plat-form {
@@ -263,6 +271,16 @@ input[type="email"].input-style:focus {
   text-align: center;
 }
 
+.ajouter-plat-form .success {
+  color: var(--success, #1a7f37);
+  background: rgba(26,127,55,0.06);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
 @media (max-width: 480px) {
   .ajouter-plat-form {
     padding: 20px;
@@ -274,8 +292,11 @@ input[type="email"].input-style:focus {
 }
 
 .back-btn-wrapper {
-    margin: 1.5rem 0 1rem 0;
-    padding-left: 1rem;
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    margin: 0;
+    padding-left: 0;
   }
   .btn-primary {
     display: inline-flex;

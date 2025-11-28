@@ -1,40 +1,146 @@
 <template>
-    <Header />
+	<Header />
 	<div class="owner-root">
 		<div class="owner-content" style="width:100vw;">
 			<div class="owner-card">
 				<h1>{{ $t('owner.title') }}</h1>
 				<form class="owner-form">
 					<div class="form-group">
-						<input type="text" v-model="name" :placeholder="$t('owner.name_placeholder')" />
+						<label for="name">{{ $t('owner.name_label') }}</label>
+						<input id="name" type="text" v-model="name" :placeholder="$t('owner.name_placeholder')" />
 					</div>
 					<div class="form-group">
-						<input type="text" v-model="address" :placeholder="$t('owner.address_placeholder')" />
+						<label for="city">{{ $t('owner.city_label') }}</label>
+						<input id="city" type="text" v-model="city" :placeholder="$t('owner.city_placeholder')" />
 					</div>
 					<div class="form-group">
-						<input type="text" v-model="postal" :placeholder="$t('owner.postal_placeholder')" />
+						<label for="category">{{ $t('owner.category_label') }}</label>
+						<select id="category" v-model="category">
+							<option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+						</select>
 					</div>
 					<div class="form-group">
-						<input type="text" v-model="city" :placeholder="$t('owner.city_placeholder')" />
+						<label for="image">{{ $t('owner.image_label') }}</label>
+						<input id="image" type="file" accept="image/*" @change="onImageChange" />
+						<div v-if="imagePreview" style="margin-top:8px;text-align:center;">
+							<LazyImage :src="imagePreview" :alt="$t('owner.image_alt')" />
+						</div>
 					</div>
-					<button type="button" class="owner-btn" @click="updateRestaurant">{{ $t('owner.update_btn') }}</button>
+					<button type="button" class="owner-btn" :disabled="restaurantStore.loading" @click="updateRestaurant">
+						<span v-if="restaurantStore.loading">{{ $t('owner.updating') || 'Mise à jour...' }}</span>
+						<span v-else>{{ $t('owner.update_btn') }}</span>
+					</button>
 				</form>
+
+				<div v-if="restaurantStore.error" style="color:#b91c1c;margin-top:10px;text-align:center;">
+					{{ restaurantStore.error }}
+				</div>
+				<div v-if="restaurantStore.success" style="color:#065f46;margin-top:10px;text-align:center;">
+					{{ restaurantStore.success }}
+				</div>
+
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const name = ref('Le clos des sens')
-const address = ref('13 Rue Jean Mermoz')
-const postal = ref('74000')
-const city = ref('Annecy')
+// middleware expects NavigationGuard types in TS; cast string to any to keep runtime behavior
+definePageMeta({ middleware: ('auth' as unknown) as any })
 
-function updateRestaurant() {
-	// Ajoute ici la logique de sauvegarde
-	alert('Restaurant modifié !')
+import { useAsyncData } from '#app'
+import { useRestaurantStore } from '../../../stores/restaurantStore'
+import { useUserStore } from '../../../stores/userStore'
+import { computed, watch, onMounted, ref } from 'vue'
+import LazyImage from '~/components/LazyImage.vue'
+
+const name = ref('')
+const city = ref('')
+const category = ref('')
+const image = ref<File|null>(null)
+const imagePreview = ref('')
+
+const userStore = useUserStore()
+const restaurantStore = useRestaurantStore()
+// commande logic removed from this page; commandes live in /commandes
+
+const { data: restaurantsData } = useAsyncData('restaurants', async () => {
+  const data = await $fetch('/api/restaurants')
+  restaurantStore.setRestaurants(data)
+  return data
+})
+
+const categories = computed(() => {
+  const all = restaurantStore.restaurants.map(r => r.category).filter(Boolean)
+  return Array.from(new Set(all))
+})
+
+function fillRestaurantFields() {
+	if (!userStore.user || userStore.user.role !== 'OWNER' || !restaurantStore.restaurants.length) return
+	const resto = restaurantStore.restaurants.find((r) => r.name === userStore.user.name)
+	if (resto) {
+		name.value = resto.name
+		city.value = resto.city
+		category.value = resto.category || ''
+		imagePreview.value = resto.image || ''
+		image.value = null
+	}
 }
+
+function onImageChange(e: Event) {
+	const target = e.target as HTMLInputElement
+	if (target.files && target.files[0]) {
+		image.value = target.files[0]
+		imagePreview.value = URL.createObjectURL(target.files[0])
+	}
+}
+
+onMounted(() => {
+	fillRestaurantFields()
+})
+
+async function updateRestaurant() {
+	if (!userStore.user) {
+		restaurantStore.error = 'Utilisateur non connecté'
+		return
+	}
+
+	const currentResto = restaurantStore.restaurants.find(r => r.name === userStore.user.name)
+	if (!currentResto) {
+		restaurantStore.error = 'Aucun restaurant trouvé pour cet utilisateur'
+		return
+	}
+
+	const form = new FormData()
+	form.append('restaurant_id', String(currentResto.id))
+	form.append('name', name.value)
+	form.append('city', city.value)
+	form.append('category', category.value)
+	if (image.value) form.append('image', image.value)
+
+	try {
+		const res: any = await restaurantStore.saveRestaurant(form)
+		name.value = res.name || name.value
+		city.value = res.city || city.value
+		category.value = res.category || category.value
+		imagePreview.value = res.image || imagePreview.value
+		image.value = null
+	} catch (err) {
+		console.error('Update failed:', err)
+	}
+}
+
+// commandes management intentionally handled in /commandes route
+
+// Watch restaurants and user changes to refill fields reactively
+watch(
+	() => [restaurantStore.restaurants, userStore.user],
+	() => {
+		fillRestaurantFields()
+	},
+	{ immediate: true, deep: true }
+)
+
 </script>
 
 
@@ -43,6 +149,11 @@ function updateRestaurant() {
 	min-height: 100vh;
 	background: var(--bg);
 	font-family: 'Poppins', Inter, system-ui, Arial, sans-serif;
+	overflow: hidden;
+}
+html, body {
+	overflow-x: hidden !important;
+	overflow-y: hidden !important;
 }
 .owner-content {
 	width: 100vw;
@@ -106,6 +217,57 @@ function updateRestaurant() {
 	color: rgba(15,23,42,0.55);
 	opacity: 1;
 }
+.owner-form input[type="file"] {
+	width: 100%;
+	padding: 10px 12px;
+	font-size: 15px;
+	border-radius: 8px;
+	border: 1px solid #aaaaaa;
+	background: linear-gradient(180deg, rgba(245,245,245,0.95), rgba(235,235,235,0.95));
+	box-sizing: border-box;
+	box-shadow: inset 0 3px 8px rgba(0,0,0,0.10);
+	color: var(--text);
+	transition: box-shadow 150ms, border-color 150ms, transform 80ms;
+	margin-bottom: 4px;
+}
+.owner-form input[type="file"]:focus {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 6px 18px rgba(69,90,100,0.10);
+	transform: translateY(-1px);
+}
+.owner-form select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #aaaaaa;
+  background: linear-gradient(180deg, rgba(245,245,245,0.95), rgba(235,235,235,0.95));
+  box-sizing: border-box;
+  color: var(--text);
+  transition: box-shadow 150ms, border-color 150ms, transform 80ms;
+  margin-bottom: 4px;
+}
+.owner-form select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 6px 18px rgba(69,90,100,0.10);
+  transform: translateY(-1px);
+}
+.owner-form .form-group img {
+	border: 2px solid var(--accent);
+	background: #fff;
+	margin-top: 6px;
+	max-width: 100%;
+	max-height: 140px;
+	border-radius: 10px;
+	box-shadow: 0 2px 12px #0002;
+	object-fit: contain;
+	transition: box-shadow 0.2s;
+}
+.owner-form .form-group img:hover {
+	box-shadow: 0 4px 24px #0003;
+}
 .owner-btn {
 	width: 100%;
 	padding: 12px 0;
@@ -144,4 +306,15 @@ function updateRestaurant() {
 		border-radius: 12px;
 	}
 }
+</style>
+
+<style scoped>
+.owner-commands { margin-top: 20px; background: linear-gradient(180deg, #fff, #fff); padding: 12px; border-radius: 10px; box-shadow: 0 8px 24px rgba(12,14,20,0.04); }
+.owner-commands h2 { margin: 0 0 10px 0; color: var(--accent); font-size:1.05rem }
+.owner-commands ul { list-style:none; margin:0; padding:0 }
+.owner-commands li { padding:10px 12px; border-bottom:1px solid rgba(15,23,42,0.04); display:block }
+.owner-commands .price { font-weight:700 }
+.owner-commands button { padding:8px 10px; border-radius:8px; border:none; cursor:pointer }
+.owner-commands button:hover { transform: translateY(-1px) }
+.owner-commands button[style] { margin-left:6px }
 </style>

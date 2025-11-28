@@ -1,36 +1,36 @@
 <template>
-		<Header />
-		<div class="register-page-center">
-			<div class="register-container">
-				<h1>Créer un compte</h1>
-				<form @submit.prevent="register">
-					<div class="form-group">
-						<label for="name">Nom</label>
-						<input v-model="form.name" type="text" id="name" required />
-					</div>
-					<div class="form-group">
-						<label for="email">Email</label>
-						<input v-model="form.email" type="email" id="email" required placeholder="exemple@email.com" autocomplete="email" />
-					</div>
-					<div class="form-group">
-						<label for="password">Mot de passe</label>
-						<input v-model="form.password" type="password" id="password" required />
-					</div>
-					<div class="form-group">
-						<label for="confirmPassword">Confirmer le mot de passe</label>
-						<input v-model="form.confirmPassword" type="password" id="confirmPassword" required />
-					</div>
-					<div class="form-group">
-						<label for="role">Rôle</label>
-						<select v-model="form.role" id="role" required>
-							<option value="USER">Utilisateur</option>
-						</select>
-					</div>
-					<div v-if="error" class="error">{{ error }}</div>
-					<button type="submit">S'inscrire</button>
-				</form>
-			</div>
-		</div>
+  <Header />
+  <div class="register-page-center">
+    <div class="register-container">
+      <h1>{{ $t('register.title') }}</h1>
+      <form @submit.prevent="register">
+        <div class="form-group">
+          <label for="name">{{ $t('register.name') }}</label>
+          <input v-model="form.name" type="text" id="name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">{{ $t('register.email') }}</label>
+          <input v-model="form.email" type="email" id="email" required placeholder="exemple@email.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="password">{{ $t('register.password') }}</label>
+          <input v-model="form.password" type="password" id="password" required :placeholder="$t('register.password_placeholder')" />
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">{{ $t('register.confirmPassword') }}</label>
+          <input v-model="form.confirmPassword" type="password" id="confirmPassword" required :placeholder="$t('register.confirmPassword_placeholder')" />
+        </div>
+        <div class="form-group">
+          <label for="role">{{ $t('register.role') }}</label>
+          <select v-model="form.role" id="role" required>
+            <option value="USER">{{ $t('register.role_user') }}</option>
+          </select>
+        </div>
+        <div v-if="error" class="error">{{ error }}</div>
+        <button type="submit">{{ $t('register.submit') }}</button>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">

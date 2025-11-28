@@ -23,6 +23,17 @@
 /* Reset small parts to look consistent inside app scope */
 html, body, #__nuxt, #app {
   height: 100%;
+  overflow-y: auto; /* N'affiche la scroll bar verticale que si nécessaire */
+}
+
+/* Visually hide native vertical scrollbar while preserving scrolling behavior */
+html, body, #__nuxt, #app {
+  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, #__nuxt::-webkit-scrollbar, #app::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 /* Page background and centering */

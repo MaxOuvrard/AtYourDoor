@@ -15,7 +15,13 @@
 		"logout": "Déconnexion",
 		"login": "Se connecter",
 		"register": "Créer un compte",
-		"toggle_lang": "Changer de langue"
+		"toggle_lang": "Changer de langue",
+		"cart": "Panier",
+		"total": "Total",
+		"checkout": "Commander",
+		"order_name": "Nom de la commande",
+		"cancel": "Annuler",
+		"cart_empty": "Votre panier est vide"
 	}
 	,
 	"login": {	
@@ -53,17 +59,64 @@
 		"load_error": "Erreur lors du chargement des plats.",
 		"not_authenticated": "Utilisateur non authentifié.",
 		"none_found": "Aucun plat trouvé pour votre restaurant."
-    },
+	},
+	"register": {
+		"title": "Créer un compte",
+		"name": "Nom",
+		"email": "Email",
+		"password": "Mot de passe",
+		"password_placeholder": "Entrez votre mot de passe",
+		"confirmPassword": "Confirmer le mot de passe",
+		"confirmPassword_placeholder": "Confirmez votre mot de passe",
+		"role": "Rôle",
+		"role_user": "Utilisateur",
+		"submit": "S'inscrire"
+	},
 	"commandes": {
 		"title": "Mes Commandes",
 		"quantity": "Quantité :"
 	},
 		"owner": {
 			"title": "Mon Restaurant",
+			"name_label": "Nom du restaurant",
 			"name_placeholder": "Nom du restaurant",
+			"city_label": "Ville",
+			"city_placeholder": "Ville",
+			"category_label": "Catégorie",
+			"image_label": "Image",
+			"image_alt": "Image du restaurant",
 			"address_placeholder": "Adresse",
 			"postal_placeholder": "Code postal",
-			"city_placeholder": "Ville",
 			"update_btn": "Modifier"
 		}
+	,
+	"ajouterPlat": {
+		"retour": "Retour",
+		"titre": "Ajouter un plat",
+		"nom": "Nom du plat",
+		"description": "Description",
+		"prix": "Prix (€)",
+		"image": "Image (fichier)",
+		"apercu": "Aperçu",
+		"ajoutEnCours": "Ajout en cours...",
+		"ajouter": "Ajouter"
+	}
+	,
+	"editPlat": {
+		"back": "← Retour",
+		"title": "Éditer le plat",
+		"loading": "Chargement du plat...",
+		"name": "Nom",
+		"price": "Prix (€)",
+		"description": "Description",
+		"image_url": "Image (URL)",
+		"category": "Catégorie",
+		"save": "Enregistrer",
+		"saving": "Enregistrement...",
+		"saved": "Plat enregistré.",
+		"not_authenticated": "Non authentifié",
+		"name_required": "Le nom est requis.",
+		"price_positive": "Le prix doit être un nombre positif.",
+		"network_error": "Erreur réseau"
+	}
 }

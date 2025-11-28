@@ -5,4 +5,6 @@ export type Plat = {
   id: number;
   id_restaurant: number;
   image: string;
+  category?: string;
+  available?: boolean;
 };

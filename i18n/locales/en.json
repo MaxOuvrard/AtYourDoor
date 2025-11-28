@@ -14,7 +14,13 @@
 		   "logout": "Logout",
 		   "login": "Login",
 		   "register": "Sign up",
-		   "toggle_lang": "Switch language"
+		   "toggle_lang": "Switch language",
+		   "cart": "Cart",
+		   "total": "Total",
+		   "checkout": "Checkout",
+		   "order_name": "Order name",
+		   "cancel": "Cancel",
+		   "cart_empty": "Your cart is empty"
 	   },
 	   "login": {
 		   "title": "Login",
@@ -56,10 +62,56 @@
 	}	,
 	"owner": {
 		"title": "My Restaurant",
+		"name_label": "Restaurant name",
 		"name_placeholder": "Restaurant name",
+		"city_label": "City",
+		"city_placeholder": "City",
+		"category_label": "Category",
+		"image_label": "Image",
+		"image_alt": "Restaurant image",
 		"address_placeholder": "Address",
 		"postal_placeholder": "Postal code",
-		"city_placeholder": "City",
 		"update_btn": "Update"
+	}
+	,
+	"ajouterPlat": {
+		"retour": "Back",
+		"titre": "Add a dish",
+		"nom": "Dish name",
+		"description": "Description",
+		"prix": "Price (€)",
+		"image": "Image (file)",
+		"apercu": "Preview",
+		"ajoutEnCours": "Adding...",
+		"ajouter": "Add"
+	},
+	"editPlat": {
+		"back": "← Back",
+		"title": "Edit dish",
+		"loading": "Loading dish...",
+		"name": "Name",
+		"price": "Price (€)",
+		"description": "Description",
+		"image_url": "Image (URL)",
+		"category": "Category",
+		"save": "Save",
+		"saving": "Saving...",
+		"saved": "Dish saved.",
+		"not_authenticated": "Not authenticated",
+		"name_required": "Name is required.",
+		"price_positive": "Price must be a positive number.",
+		"network_error": "Network error"
+	},
+	"register": {
+		"title": "Create an account",
+		"name": "Name",
+		"email": "Email",
+		"password": "Password",
+		"password_placeholder": "Enter your password",
+		"confirmPassword": "Confirm password",
+		"confirmPassword_placeholder": "Confirm your password",
+		"role": "Role",
+		"role_user": "User",
+		"submit": "Sign up"
 	}
 }

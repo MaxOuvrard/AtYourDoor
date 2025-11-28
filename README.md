@@ -2,6 +2,8 @@
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
+![CI](https://github.com/MaxOuvrard/AtYourDoor/actions/workflows/ci.yml/badge.svg)
+
 ## Setup
 
 Make sure to install dependencies:

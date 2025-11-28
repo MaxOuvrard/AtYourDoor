@@ -14,8 +14,8 @@
       </div>
     
     <div class="login-container">
-      <h1>{{ $t('login.title') }}</h1>
       <form @submit.prevent="handleLogin()">
+        <h1>{{ $t('login.title') }}</h1>
         <div class="form-group">
           <label for="username">{{ $t('login.username') }}</label>
           <input type="text" id="username" v-model="username" required :placeholder="$t('login.username_placeholder')" />

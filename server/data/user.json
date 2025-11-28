@@ -7,20 +7,6 @@
     "role": "ADMIN"
   },
   {
-    "id": 2,
-    "name": "User",
-    "password": "user123",
-    "email": "user@example.com",
-    "role": "USER"
-  },
-  {
-    "id": 3,
-    "name": "RestaurantOwner",
-    "password": "resto123",
-    "email": "resto@example.com",
-    "role": "OWNER"
-  },
-  {
     "id": 1764188171349,
     "name": "Michou",
     "email": "maxenceouvrard.pro@gmail.com",
@@ -28,24 +14,38 @@
     "role": "USER"
   },
   {
-    "id": 1764189448080,
-    "name": "owner maxence",
-    "email": "maxence.ouvrard78@gmail.com",
-    "password": "test123",
+    "id": 1764189955749,
+    "name": "Le Freti 3",
+    "email": "freti@gmail.com",
+    "password": "oui",
     "role": "OWNER"
   },
   {
-    "id": 1764189955748,
-    "name": "Maurice",
-    "email": "mkjdsbsd@jhvcwd.fr",
-    "password": "oui",
+    "id": 1764369165870,
+    "name": "E2E User 1764369165821",
+    "email": "e2e-1764369165821@example.com",
+    "password": "password123",
     "role": "USER"
   },
   {
-    "id": 1764189955749,
-    "name": "Le Freti",
-    "email": "freti@gmail.com",
-    "password": "ghjcghj",
-    "role": "OWNER"
+    "id": 1764369291168,
+    "name": "E2E User 1764369291152",
+    "email": "e2e-1764369291152@example.com",
+    "password": "password123",
+    "role": "USER"
+  },
+  {
+    "id": 1764369441059,
+    "name": "E2E User 1764369441022",
+    "email": "e2e-1764369441022@example.com",
+    "password": "password123",
+    "role": "USER"
+  },
+  {
+    "id": 1764369560718,
+    "name": "E2E User 1764369560703",
+    "email": "e2e-1764369560703@example.com",
+    "password": "password123",
+    "role": "USER"
   }
 ]

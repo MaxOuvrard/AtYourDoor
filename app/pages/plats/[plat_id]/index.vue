@@ -2,7 +2,7 @@
 
 import type { Plat } from "~/modules/plat/types";
 import { ref, computed, watch } from 'vue';
-import LazyImage from '~/components/LazyImage.vue'
+import AppImage from '~/components/AppImage.vue'
 import { useGlobalStore } from '../../../../stores/globalStore'
 import { useUserStore } from '../../../../stores/userStore'
 import { storeToRefs } from 'pinia'
@@ -98,8 +98,8 @@ const cartMessage = ref('');
                     <button @click="refreshPlat?.()" style="margin-top:8px;">Réessayer</button>
                 </div>
             <NuxtLink :to="`/restaurants/${plat.id_restaurant}`" class="nuxt-link-back">← Voir le restaurant</NuxtLink>
-            <div class="plat-detail">
-                <LazyImage class="plat-detail-image" :src="plat.image" :alt="plat.name" />
+                <div class="plat-detail">
+                <AppImage class="plat-detail-image" :src="plat.image" :alt="plat.name" />
                 <div class="plat-detail-info">
                     <h1>{{ plat.name }}</h1>
                     <p class="plat-price">{{ plat.price + ' €' }}</p>

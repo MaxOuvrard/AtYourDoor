@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from "vue";
 import { defineAsyncComponent } from 'vue'
-import LazyImage from '~/components/LazyImage.vue'
+import AppImage from '~/components/AppImage.vue'
 import type { Restaurant } from "~/modules/restaurant/types";
 import type { Plat } from "~/modules/plat/types";
 import useResource from '~/composables/useResource'
@@ -69,7 +69,7 @@ const platsForRestaurant = computed(() => {
   <section v-if="restaurant" class="restaurant-page">
         <div class="restaurant-card">
         <div class="restaurant-image-wrapper">
-          <LazyImage :src="restaurant.image" :alt="restaurant.name" />
+          <AppImage :src="restaurant.image" :alt="restaurant.name" />
         </div>
       <div class="restaurant-info">
         <h1 class="restaurant-title">{{ restaurant.name }}</h1>

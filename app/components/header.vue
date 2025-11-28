@@ -2,7 +2,7 @@
     <header class="site-header" role="banner">
         <div class="container">
                 <NuxtLink to="/" class="brand" :aria-label="$t('header.home')">
-                <LazyImage src="/images/Logo_header.png" alt="AtYourDoor" class="logo" />
+                <AppImage src="/images/Logo_header.png" alt="AtYourDoor" class="logo" />
             </NuxtLink>
             <nav class="nav" role="navigation" aria-label="Main navigation">
                 <template v-if="isAuthenticated">
@@ -160,7 +160,7 @@ function toggleLocale() {
     locale.value = locale.value === 'fr' ? 'en' : 'fr'
     try { if (typeof document !== 'undefined') document.documentElement.lang = String(locale.value) } catch (e) {}
 }
-import LazyImage from '~/components/LazyImage.vue'
+import AppImage from '~/components/AppImage.vue'
 </script>
 <style scoped>
 /* Toggle langue */

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import LazyImage from '~/components/LazyImage.vue'
+import AppImage from '~/components/AppImage.vue'
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '../../../../stores/userStore';
 import { useRestaurantStore } from '../../../../stores/restaurantStore';
@@ -177,7 +177,7 @@ function cancel() {
 
         <!-- main photo display -->
         <div class="main-photo">
-            <LazyImage :key="(form.image || '') + '-' + imageVersion" :src="imageSrc" :alt="$t('editPlat.title')" @error="onImageError" />
+          <AppImage :key="(form.image || '') + '-' + imageVersion" :src="imageSrc" :alt="$t('editPlat.title')" @error="onImageError" />
         </div>
 
         <label>

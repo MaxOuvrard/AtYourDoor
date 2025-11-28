@@ -4,7 +4,7 @@ definePageMeta({ middleware: ('auth' as unknown) as any })
 import { ref } from 'vue';
 import { useUserStore } from '../../../stores/userStore';
 import { useRouter } from 'vue-router';
-import LazyImage from '~/components/LazyImage.vue'
+import AppImage from '~/components/AppImage.vue'
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -102,7 +102,7 @@ function onImageChange(e: Event) {
           <label for="image">{{ $t('ajouterPlat.image') }}</label>
           <input id="image" type="file" accept="image/*" @change="onImageChange" required class="input-style file-input" />
           <div v-if="imagePreview" style="margin-top:10px;">
-            <LazyImage :src="imagePreview" :alt="$t('ajouterPlat.apercu')" style="max-width:100%;max-height:120px;border-radius:8px;" />
+            <AppImage :src="imagePreview" :alt="$t('ajouterPlat.apercu')" style="max-width:100%;max-height:120px;border-radius:8px;" />
           </div>
         </div>
         <div v-if="error" class="error">{{ error }}</div>

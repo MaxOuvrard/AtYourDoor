@@ -24,6 +24,7 @@ const { data: restaurants, refresh } = await useAsyncData("restaurants-admin", (
 );
 
 import { ref } from 'vue';
+import AppImage from '~/components/AppImage.vue'
 const showConfirm = ref(false);
 const restaurantToDelete = ref<number|null>(null);
 const errorDelete = ref('');
@@ -35,7 +36,6 @@ function askDelete(id: number) {
 }
 
 function removeRestaurantFromList(id: number) {
-  import LazyImage from '~/components/LazyImage.vue'
   if (restaurants.value) {
     restaurants.value = restaurants.value.filter(r => r.id !== id);
   }
@@ -86,7 +86,7 @@ function cancelDelete() {
       <tbody>
         <tr v-for="restaurant in restaurants" :key="restaurant.id" style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px 8px;">
-            <LazyImage :src="restaurant.image" :alt="restaurant.name" />
+            <AppImage :src="restaurant.image" :alt="restaurant.name" />
           </td>
           <td style="padding: 10px 8px; font-weight: 600;">{{ restaurant.name }}</td>
           <td style="padding: 10px 8px;">{{ restaurant.city }}</td>

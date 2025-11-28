@@ -1,4 +1,4 @@
-import { useUserStore } from '~/stores/userStore'
+import { useUserStore } from '../../stores/userStore'
 
 export default defineNuxtRouteMiddleware((to) => {
   // client-side authentication guard: init store from localStorage and redirect if no token

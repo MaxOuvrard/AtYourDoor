@@ -23,7 +23,7 @@
 						<label for="image">{{ $t('owner.image_label') }}</label>
 						<input id="image" type="file" accept="image/*" @change="onImageChange" />
 						<div v-if="imagePreview" style="margin-top:8px;text-align:center;">
-							<LazyImage :src="imagePreview" :alt="$t('owner.image_alt')" />
+							<AppImage :src="imagePreview" :alt="$t('owner.image_alt')" />
 						</div>
 					</div>
 					<button type="button" class="owner-btn" :disabled="restaurantStore.loading" @click="updateRestaurant">
@@ -52,7 +52,7 @@ import { useAsyncData } from '#app'
 import { useRestaurantStore } from '../../../stores/restaurantStore'
 import { useUserStore } from '../../../stores/userStore'
 import { computed, watch, onMounted, ref } from 'vue'
-import LazyImage from '~/components/LazyImage.vue'
+import AppImage from '~/components/AppImage.vue'
 
 const name = ref('')
 const city = ref('')

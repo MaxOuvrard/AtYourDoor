@@ -4,7 +4,7 @@ import { defineAsyncComponent } from 'vue'
 import AppImage from '~/components/AppImage.vue'
 import type { Restaurant } from "~/modules/restaurant/types";
 import type { Plat } from "~/modules/plat/types";
-import useResource from '~/composables/useResource'
+import useResource from '../../../composables/useResource'
 import "~/assets/css/style.css";
 
 import { useSeoMeta } from 'nuxt/app';

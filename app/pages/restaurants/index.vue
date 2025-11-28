@@ -2,7 +2,7 @@
 
 import type { Restaurant } from "../../modules/restaurant/types";
 import { useSeoMeta } from 'nuxt/app';
-import useResource from '~/composables/useResource'
+import useResource from '../../../composables/useResource'
 
 useSeoMeta({
   title: 'Restaurants - AtYourDoor',

@@ -1,6 +1,7 @@
 <template>
-    <Header />
-  <div class="page-root">
+  <Header />
+  <div class>
+    
     <!-- Background carousel (behind content) -->
       <div class="bg-carousel" aria-hidden="true">
         <div
@@ -11,31 +12,12 @@
         ></div>
         <div class="bg-overlay"></div>
       </div>
-
-    <div class="login-container">
-      <form @submit.prevent="handleLogin()">
-        <div class="form-group">
-          <label for="username">Username: </label>
-          <input type="text" id="username" v-model="username" required placeholder="Entrez votre nom d'utilisateur" />
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password: </label>
-          <input type="password" id="password" v-model="password" required placeholder="Entrez votre mot de passe" />
-        </div>
-
-        <div class="form-group" v-if="error" style="color:var(--error, #c00);">
-          {{ error }}
-        </div>
-
-        <div class="form-group" v-if="loading">
-          <div class="loading"><span class="spinner" aria-hidden></span> Signing in…</div>
-        </div>
-
-        <div class="form-group">
-          <button type="submit" :disabled="loading">{{ loading ? 'Logging in...' : 'Login' }}</button>
-        </div>
-      </form>
+    
+    <div class="welcome-container">
+      <h1>{{ $t('home_title') }}</h1>
+      <NuxtLink to="/restaurants">
+        <button class="access-btn">{{ $t('access_restaurants') }}</button>
+      </NuxtLink>
     </div>
   </div>
 </template>
@@ -80,5 +62,5 @@ onUnmounted(() => {
 })
 </script>
 
-<style src="../assets/css/style.css"></style>
+<style src="assets/css/style.css"></style>
 

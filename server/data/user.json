@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "name": "Admin",
+    "password": "root",
+    "email": "admin@example.com",
+    "role": "ADMIN"
+  },
+  {
+    "id": 2,
+    "name": "User",
+    "password": "user123",
+    "email": "user@example.com",
+    "role": "USER"
+  },
+  {
+    "id": 3,
+    "name": "RestaurantOwner",
+    "password": "resto123",
+    "email": "resto@example.com",
+    "role": "OWNER"
+  },
+  {
+    "id": 1764188171349,
+    "name": "Michou",
+    "email": "maxenceouvrard.pro@gmail.com",
+    "password": "test123",
+    "role": "USER"
+  },
+  {
+    "id": 1764189448080,
+    "name": "owner maxence",
+    "email": "maxence.ouvrard78@gmail.com",
+    "password": "test123",
+    "role": "OWNER"
+  },
+  {
+    "id": 1764189955748,
+    "name": "Maurice",
+    "email": "mkjdsbsd@jhvcwd.fr",
+    "password": "oui",
+    "role": "USER"
+  },
+  {
+    "id": 1764189955749,
+    "name": "Le Freti",
+    "email": "freti@gmail.com",
+    "password": "ghjcghj",
+    "role": "OWNER"
+  }
+]

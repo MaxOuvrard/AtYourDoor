@@ -1,0 +1,65 @@
+{
+	"hello": "Hello",
+	"welcome": "Welcome to AtYourDoor!",
+	"access_restaurants": "Access restaurants",
+	"home_title": "AtYourDoor, the number 1 platform for home meal delivery, worldwide",
+	   "header": {
+		   "home": "Home",
+		   "restaurants": "Restaurants",
+		   "profile": "Profile",
+		   "orders": "Orders",
+		   "admin": "Restaurant owner",
+		   "my_restaurant": "My restaurant",
+		   "my_dishes": "My dishes",
+		   "logout": "Logout",
+		   "login": "Login",
+		   "register": "Sign up",
+		   "toggle_lang": "Switch language"
+	   },
+	   "login": {
+		   "title": "Login",
+		   "username": "Username:",
+		   "username_placeholder": "Enter your username",
+		   "password": "Password:",
+		   "password_placeholder": "Enter your password",
+		   "signing_in": "Signing in…",
+		   "logging_in": "Logging in...",
+		   "login_btn": "Login"
+	   },
+	   "mesplats": {
+		   "title": "My dishes",
+		   "add": "Add a dish",
+		   "loading": "Loading...",
+		   "network_error": "Network error.",
+		   "load_error": "Error while loading dishes.",
+		   "not_authenticated": "User not authenticated.",
+		   "none_found": "No dish found for your restaurant."
+	   },
+	   "admin": {
+		   "add_restaurant": "Add a restaurant",
+		   "title": "Restaurant management",
+		   "image": "Image",
+		   "name": "Name",
+		   "city": "City",
+		   "category": "Category",
+		   "actions": "Actions",
+		   "delete_error": "Error while deleting.",
+		   "delete": "Delete",
+		   "confirm_delete_title": "Confirm deletion",
+		   "confirm_delete_text": "Do you really want to delete this restaurant? This action is irreversible.",
+		   "cancel": "Cancel",
+		   "none_found": "No restaurant found."
+	   }	,
+	"commandes": {
+		"title": "My Orders",
+		"quantity": "Quantity:"
+	}	,
+	"owner": {
+		"title": "My Restaurant",
+		"name_placeholder": "Restaurant name",
+		"address_placeholder": "Address",
+		"postal_placeholder": "Postal code",
+		"city_placeholder": "City",
+		"update_btn": "Update"
+	}
+}

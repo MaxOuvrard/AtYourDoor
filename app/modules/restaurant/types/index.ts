@@ -3,4 +3,5 @@ export type Restaurant = {
   city: string;
   id: number;
   image: string;
+  category: string;
 };

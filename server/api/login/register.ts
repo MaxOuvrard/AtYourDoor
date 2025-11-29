@@ -37,9 +37,17 @@ export default defineEventHandler(async (event) => {
   // Charger les utilisateurs existants
   let users = []
   try {
-    const usersPath = await findUsersPath()
-    const data = await fs.readFile(usersPath, 'utf-8')
-    users = JSON.parse(data)
+    // Try to import the JSON so Nitro bundler includes it on serverless (Vercel)
+    try {
+      // @ts-ignore
+      const mod = await import('../../data/user.json', { assert: { type: 'json' } })
+      users = mod?.default || mod
+      console.debug('[register] loaded users via dynamic import, count=', users.length)
+    } catch (importErr) {
+      const usersPath = await findUsersPath()
+      const data = await fs.readFile(usersPath, 'utf-8')
+      users = JSON.parse(data)
+    }
   } catch (e) {
     users = []
   }

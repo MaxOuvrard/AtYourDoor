@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "postbuild": "node ./tools/copy-data.js",
     "images:convert": "node ./tools/convert-images.js",
     "test:unit": "vitest",
     "test:e2e:install": "npx playwright install --with-deps",

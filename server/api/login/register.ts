@@ -1,8 +1,29 @@
 import { readBody } from 'h3'
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url'
 
-const USERS_PATH = path.resolve(process.cwd(), 'server/data/user.json')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+async function findUsersPath(createIfMissing = false) {
+  const candidates = [
+    path.resolve(process.cwd(), 'server/data/user.json'),
+    path.resolve(process.cwd(), '.output', 'server', 'server', 'data', 'user.json'),
+    path.resolve(process.cwd(), '.output', 'public', 'server', 'data', 'user.json'),
+    path.resolve(__dirname, '../../data/user.json')
+  ]
+  for (const p of candidates) {
+    try {
+      await fs.stat(p)
+      return p
+    } catch (e) {
+      // continue
+    }
+  }
+  // if allowed, return first candidate to attempt creation
+  if (createIfMissing) return candidates[0]
+  return path.resolve(process.cwd(), 'server/data/user.json')
+}
 
 
 export default defineEventHandler(async (event) => {
@@ -16,7 +37,8 @@ export default defineEventHandler(async (event) => {
   // Charger les utilisateurs existants
   let users = []
   try {
-    const data = await fs.readFile(USERS_PATH, 'utf-8')
+    const usersPath = await findUsersPath()
+    const data = await fs.readFile(usersPath, 'utf-8')
     users = JSON.parse(data)
   } catch (e) {
     users = []
@@ -38,7 +60,13 @@ export default defineEventHandler(async (event) => {
   users.push(newUser)
 
   // Sauvegarder
-  await fs.writeFile(USERS_PATH, JSON.stringify(users, null, 2), 'utf-8')
+  try {
+    const usersPathToWrite = await findUsersPath(true)
+    await fs.writeFile(usersPathToWrite, JSON.stringify(users, null, 2), 'utf-8')
+  } catch (e) {
+    // write failed in production (read-only output). Inform caller.
+    return { error: 'register.errors.save_failed' }
+  }
 
   return { user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role } }
 })

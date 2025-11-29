@@ -1,9 +1,7 @@
 import { readBody, getHeader, H3Event } from 'h3';
 import { promises as fs } from 'fs';
 import path from 'path';
-import platsData from "../../data/plats.json";
-import users from "../../data/user.json";
-import restaurants from "../../data/restaurants.json";
+import { readData, writeData } from '../../utils/jsonStore';
 import type { Plat } from "../../../app/modules/plat/types";
 
 const PLATS_PATH = path.resolve(process.cwd(), 'server/data/plats.json');
@@ -15,7 +13,8 @@ export default defineEventHandler(async (event: H3Event) => {
   // GET: retourner le plat
   const method = (event.node.req as any)?.method || 'GET';
   if (method === 'GET') {
-    const foundPlat = (platsData as Plat[])?.find?.((plat) => plat.id == platId);
+    const platsDataArr = await readData('plats') as Plat[]
+    const foundPlat = (platsDataArr as Plat[])?.find?.((plat) => plat.id == platId);
     if (!foundPlat) {
       throw createError({ status: 404 });
     }
@@ -34,7 +33,8 @@ export default defineEventHandler(async (event: H3Event) => {
     let user: any | undefined = undefined;
     try {
       const decoded = Buffer.from(token, 'base64').toString('utf-8');
-      user = users.find(u => decoded.startsWith(u.email));
+      const usersArr = await readData('user')
+      user = usersArr.find((u: any) => decoded.startsWith(String(u.email)));
     } catch (e) {
       return { error: 'Token invalide', status: 401 };
     }
@@ -43,7 +43,8 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // Vérifier que le plat appartient bien au restaurant du propriétaire
-    const restaurant = restaurants.find(r => r.name.trim().toLowerCase() === user.name.trim().toLowerCase());
+    const restaurantsArr = await readData('restaurants')
+    const restaurant = (restaurantsArr as any[]).find(r => r.name.trim().toLowerCase() === user.name.trim().toLowerCase());
     if (!restaurant) {
       return { error: 'Aucun restaurant associé au propriétaire', status: 404 };
     }
@@ -51,8 +52,7 @@ export default defineEventHandler(async (event: H3Event) => {
     // Lire le fichier plats.json actuel
     let platsArr: Plat[] = [];
     try {
-      const raw = await fs.readFile(PLATS_PATH, 'utf-8');
-      platsArr = JSON.parse(raw) as Plat[];
+      platsArr = await readData('plats') as Plat[]
     } catch (e) {
       return { error: 'Erreur serveur lors de la lecture des plats', status: 500 };
     }
@@ -78,9 +78,9 @@ export default defineEventHandler(async (event: H3Event) => {
     platsArr[platIndex] = updatedPlat;
 
     try {
-      await fs.writeFile(PLATS_PATH, JSON.stringify(platsArr, null, 2), 'utf-8');
+      await writeData('plats', platsArr)
     } catch (e) {
-      return { error: 'Erreur serveur lors de la sauvegarde', status: 500 };
+      return { error: 'Writes disabled on this deployment', status: 503 };
     }
 
     return updatedPlat;
@@ -113,8 +113,7 @@ export default defineEventHandler(async (event: H3Event) => {
     // Lire le fichier plats.json actuel
     let platsArr: Plat[] = [];
     try {
-      const raw = await fs.readFile(PLATS_PATH, 'utf-8');
-      platsArr = JSON.parse(raw) as Plat[];
+      platsArr = await readData('plats') as Plat[]
     } catch (e) {
       return { error: 'Erreur serveur lors de la lecture des plats', status: 500 };
     }
@@ -142,9 +141,9 @@ export default defineEventHandler(async (event: H3Event) => {
     // Retirer et sauvegarder
     platsArr.splice(platIndex, 1);
     try {
-      await fs.writeFile(PLATS_PATH, JSON.stringify(platsArr, null, 2), 'utf-8');
+      await writeData('plats', platsArr)
     } catch (e) {
-      return { error: 'Erreur serveur lors de la sauvegarde', status: 500 };
+      return { error: 'Writes disabled on this deployment', status: 503 };
     }
 
     return { success: true };

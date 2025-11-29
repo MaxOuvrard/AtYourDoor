@@ -1,6 +1,7 @@
 import { readBody } from 'h3'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { readData, writeData } from '../../utils/jsonStore'
 
 const COMMANDES_PATH = path.resolve(process.cwd(), 'server/data/commandes.json')
 
@@ -11,8 +12,7 @@ export default defineEventHandler(async (event) => {
   if (!idParam) return { error: 'Missing id' }
 
   try {
-    const raw = await fs.readFile(COMMANDES_PATH, 'utf-8')
-    const commandes = JSON.parse(raw || '[]')
+    const commandes = await readData('commandes') || []
 
     const id = isNaN(Number(idParam)) ? idParam : Number(idParam)
     const idx = commandes.findIndex((c: any) => String(c.id) === String(id))
@@ -27,14 +27,22 @@ export default defineEventHandler(async (event) => {
       const now = new Date().toISOString()
       const updated = { ...commandes[idx], ...body, updatedAt: now }
       commandes[idx] = updated
-      await fs.writeFile(COMMANDES_PATH, JSON.stringify(commandes, null, 2), 'utf-8')
-      return updated
+      try {
+        await writeData('commandes', commandes)
+        return updated
+      } catch (e) {
+        return { error: 'Writes disabled on this deployment' }
+      }
     }
 
     if (method === 'DELETE') {
       commandes.splice(idx, 1)
-      await fs.writeFile(COMMANDES_PATH, JSON.stringify(commandes, null, 2), 'utf-8')
-      return { success: true }
+      try {
+        await writeData('commandes', commandes)
+        return { success: true }
+      } catch (e) {
+        return { error: 'Writes disabled on this deployment' }
+      }
     }
 
     return { error: 'Method not allowed', status: 405 }

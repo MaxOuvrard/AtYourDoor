@@ -1,8 +1,7 @@
 import { readBody } from 'h3'
 import { promises as fs } from 'fs'
 import path from 'path'
-
-const USERS_PATH = path.resolve(process.cwd(), 'server/data/user.json')
+import { readData, writeData } from '../../utils/jsonStore'
 
 export default defineEventHandler(async (event) => {
 	const body = await readBody(event)
@@ -14,8 +13,7 @@ export default defineEventHandler(async (event) => {
 
 	let users = []
 	try {
-		const data = await fs.readFile(USERS_PATH, 'utf-8')
-		users = JSON.parse(data)
+		users = await readData('user')
 	} catch (e) {
 		return { error: 'Erreur serveur lors de la lecture des utilisateurs.' }
 	}
@@ -30,9 +28,9 @@ export default defineEventHandler(async (event) => {
 	users[userIndex].password = password // En prod, il faut hasher le mot de passe !
 
 	try {
-		await fs.writeFile(USERS_PATH, JSON.stringify(users, null, 2), 'utf-8')
+		await writeData('user', users)
 	} catch (e) {
-		return { error: 'Erreur serveur lors de la sauvegarde.' }
+		return { error: 'Writes disabled on this deployment' }
 	}
 
 	// Retourner l'utilisateur mis à jour (sans le mot de passe)

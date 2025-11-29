@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import { readData, writeData } from '../../utils/jsonStore';
 
 export default defineEventHandler(async (event) => {
 	const form = await readMultipartFormData(event);
@@ -31,17 +32,8 @@ export default defineEventHandler(async (event) => {
 		}
 	}
 
-	// Chemins des fichiers JSON
-	const usersPath = path.resolve(process.cwd(), 'server/data/user.json');
-	const restaurantsPath = path.resolve(process.cwd(), 'server/data/restaurants.json');
-
 	// Lecture des utilisateurs
-	let users = [];
-	try {
-		users = JSON.parse(await fs.readFile(usersPath, 'utf-8'));
-	} catch {
-		users = [];
-	}
+	let users = await readData('user')
 
 	// Vérifie si l'utilisateur existe déjà
 	if (users.some((u: any) => u.email === fields.email)) {
@@ -57,15 +49,14 @@ export default defineEventHandler(async (event) => {
 		role: 'OWNER'
 	};
 	users.push(newUser);
-	await fs.writeFile(usersPath, JSON.stringify(users, null, 2), 'utf-8');
+	try {
+		await writeData('user', users)
+	} catch (e) {
+		return { status: 503, error: 'Writes disabled on this deployment' }
+	}
 
 	// Lecture des restaurants
-	let restaurants = [];
-	try {
-		restaurants = JSON.parse(await fs.readFile(restaurantsPath, 'utf-8'));
-	} catch {
-		restaurants = [];
-	}
+	let restaurants = await readData('restaurants')
 
 	// Gestion de l'image
 	let imageUrl = '';
@@ -88,7 +79,11 @@ export default defineEventHandler(async (event) => {
 		category: fields.category || 'autre'
 	};
 	restaurants.push(newRestaurant);
-	await fs.writeFile(restaurantsPath, JSON.stringify(restaurants, null, 2), 'utf-8');
+	try {
+		await writeData('restaurants', restaurants)
+	} catch (e) {
+		return { status: 503, error: 'Writes disabled on this deployment' }
+	}
 
 	return newRestaurant;
 });

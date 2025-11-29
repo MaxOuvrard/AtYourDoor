@@ -1,22 +1,18 @@
 import { readBody } from 'h3'
 import fs from 'fs/promises'
 import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 async function findUsersPath() {
+    const projectRoot = process.cwd()
     const candidates = [
-        path.resolve(process.cwd(), 'server/data/user.json'),
-        path.resolve(process.cwd(), '.output', 'server', 'data', 'user.json'),
-        path.resolve(process.cwd(), '.output', 'server', 'server', 'data', 'user.json'),
-        path.resolve(process.cwd(), '.output', 'public', 'server', 'data', 'user.json'),
-        path.resolve(process.cwd(), '.output', 'public', 'data', 'user.json'),
-        path.resolve(__dirname, '../../data/user.json'),
-        path.resolve(__dirname, '../data/user.json')
+        path.resolve(projectRoot, 'server', 'data', 'user.json'),
+        path.resolve(projectRoot, '.output', 'server', 'data', 'user.json'),
+        path.resolve(projectRoot, '.output', 'server', 'server', 'data', 'user.json'),
+        path.resolve(projectRoot, '.output', 'public', 'server', 'data', 'user.json'),
+        path.resolve(projectRoot, '.output', 'public', 'data', 'user.json'),
+        path.resolve(projectRoot, 'server', 'data', 'user.json')
     ]
 
-    // try each candidate and return the first existing one
     for (const p of candidates) {
         try {
             await fs.stat(p)
@@ -27,7 +23,7 @@ async function findUsersPath() {
     }
 
     // fallback to original path (will likely fail and be handled by caller)
-    return path.resolve(process.cwd(), 'server/data/user.json')
+    return path.resolve(projectRoot, 'server', 'data', 'user.json')
 }
 
 export default defineEventHandler(async (event) => {

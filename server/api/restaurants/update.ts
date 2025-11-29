@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs'
 import path from 'path'
+import { readData, writeData } from '../../utils/jsonStore'
 
 export default defineEventHandler(async (event) => {
   let form
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
   const usersPath = path.resolve(process.cwd(), 'server/data/user.json')
 
   let restaurants = []
-  try { restaurants = JSON.parse(await fs.readFile(restaurantsPath, 'utf-8')) } catch { restaurants = [] }
+  try { restaurants = await readData('restaurants') } catch { restaurants = [] }
 
   const idx = restaurants.findIndex((r: any) => r.id === restaurantId)
   if (idx === -1) throw createError({ statusCode: 404, statusMessage: 'Restaurant non trouvé' })
@@ -52,14 +53,14 @@ export default defineEventHandler(async (event) => {
 
   // Write restaurants
   try {
-    await fs.writeFile(restaurantsPath, JSON.stringify(restaurants, null, 2), 'utf-8')
+    await writeData('restaurants', restaurants)
   } catch (e) {
-    throw createError({ statusCode: 500, statusMessage: 'Erreur serveur lors de la sauvegarde des restaurants' })
+    throw createError({ statusCode: 500, statusMessage: 'Writes disabled on this deployment' })
   }
 
   // Update user(s) with role OWNER and matching old restaurant name -> set to new restaurant name
   try {
-    let users = JSON.parse(await fs.readFile(usersPath, 'utf-8'))
+    let users = await readData('user')
     const newName = restaurants[idx].name
     let changed = false
     users = users.map((u: any) => {
@@ -69,10 +70,10 @@ export default defineEventHandler(async (event) => {
       }
       return u
     })
-    if (changed) await fs.writeFile(usersPath, JSON.stringify(users, null, 2), 'utf-8')
+    if (changed) await writeData('user', users)
   } catch (e) {
     // If user update fails, return a 500 error so client can handle it via store
-    throw createError({ statusCode: 500, statusMessage: 'Erreur serveur lors de la mise à jour des utilisateurs' })
+    throw createError({ statusCode: 500, statusMessage: 'Writes disabled on this deployment' })
   }
 
   return restaurants[idx]

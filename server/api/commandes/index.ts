@@ -1,6 +1,7 @@
 import { readBody } from 'h3'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { readData, writeData } from '../../utils/jsonStore'
 
 const COMMANDES_PATH = path.resolve(process.cwd(), 'server/data/commandes.json')
 
@@ -8,8 +9,7 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method || 'GET'
   if (method === 'GET') {
     try {
-      const data = await fs.readFile(COMMANDES_PATH, 'utf-8')
-      const commandes = JSON.parse(data)
+      const commandes = await readData('commandes')
       return commandes
     } catch (e) {
       return []
@@ -19,8 +19,7 @@ export default defineEventHandler(async (event) => {
   if (method === 'POST') {
     const body = await readBody(event)
     try {
-      const raw = await fs.readFile(COMMANDES_PATH, 'utf-8')
-      const commandes = JSON.parse(raw || '[]')
+      const commandes = await readData('commandes') || []
       const now = new Date().toISOString()
       const cmd = {
         id: body.id || Date.now(),
@@ -34,10 +33,14 @@ export default defineEventHandler(async (event) => {
         updatedAt: now
       }
       commandes.push(cmd)
-      await fs.writeFile(COMMANDES_PATH, JSON.stringify(commandes, null, 2), 'utf-8')
-      return cmd
+      try {
+        await writeData('commandes', commandes)
+        return cmd
+      } catch (e:any) {
+        return { error: 'Writes disabled on this deployment' }
+      }
     } catch (e:any) {
-      return { error: 'Unable to save commande', detail: e?.message }
+      return { error: 'Unable to read commandes', detail: e?.message }
     }
   }
 

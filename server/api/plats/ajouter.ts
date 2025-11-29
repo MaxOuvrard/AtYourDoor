@@ -1,8 +1,7 @@
 import { readMultipartFormData, getHeader, H3Event } from 'h3';
 import { promises as fs } from 'fs';
 import path from 'path';
-import users from "../../data/user.json";
-import restaurants from "../../data/restaurants.json";
+import { readData, writeData } from '../../utils/jsonStore';
 
 const PLATS_PATH = path.resolve(process.cwd(), 'server/data/plats.json');
 
@@ -16,7 +15,8 @@ export default defineEventHandler(async (event: H3Event) => {
 	let user: any | undefined = undefined;
 	try {
 		const decoded = Buffer.from(token, 'base64').toString('utf-8');
-		user = (users as any[]).find(u => decoded.startsWith(String(u.email)));
+		const usersArr = await readData('user')
+		user = (usersArr as any[]).find(u => decoded.startsWith(String(u.email)));
 	} catch (e) {
 		return createError({ statusCode: 401, statusMessage: 'Token invalide' });
 	}
@@ -53,7 +53,8 @@ export default defineEventHandler(async (event: H3Event) => {
 	if (user.id_restaurant) {
 		restaurantId = Number(user.id_restaurant);
 	} else {
-		const r = (restaurants as any[]).find(r => r.name && String(r.name).trim().toLowerCase() === String(user.name).trim().toLowerCase());
+		const restaurantsArr = await readData('restaurants')
+		const r = (restaurantsArr as any[]).find(r => r.name && String(r.name).trim().toLowerCase() === String(user.name).trim().toLowerCase());
 		if (r) restaurantId = Number(r.id);
 	}
 	if (!restaurantId) return createError({ statusCode: 404, statusMessage: 'Aucun restaurant trouvé pour ce propriétaire' });
@@ -61,10 +62,9 @@ export default defineEventHandler(async (event: H3Event) => {
 	// Lire plats existants
 	let platsArr: any[] = [];
 	try {
-		const raw = await fs.readFile(PLATS_PATH, 'utf-8');
-		platsArr = JSON.parse(raw) as any[];
+		platsArr = await readData('plats') as any[]
 	} catch (e) {
-		platsArr = [];
+		platsArr = []
 	}
 
 	// Gérer l'image si présente
@@ -94,9 +94,9 @@ export default defineEventHandler(async (event: H3Event) => {
 	platsArr.push(newPlat);
 
 	try {
-		await fs.writeFile(PLATS_PATH, JSON.stringify(platsArr, null, 2), 'utf-8');
+		await writeData('plats', platsArr)
 	} catch (e) {
-		return createError({ statusCode: 500, statusMessage: 'Erreur écriture plats' });
+		return createError({ statusCode: 503, statusMessage: 'Writes disabled on this deployment' });
 	}
 
 	return newPlat;

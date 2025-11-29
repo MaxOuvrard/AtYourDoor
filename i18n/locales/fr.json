@@ -32,7 +32,12 @@
 		"password_placeholder": "Entrez votre mot de passe",
 		"signing_in": "Connexion en cours…",
 		"logging_in": "Connexion...",
-		"login_btn": "Connexion"
+		"login_btn": "Connexion",
+		"errors": {
+			"missing_fields": "Veuillez fournir le nom d'utilisateur et le mot de passe.",
+			"invalid_credentials": "Nom d'utilisateur ou mot de passe invalide.",
+			"server": "Erreur du serveur. Veuillez réessayer plus tard."
+		}
 	}
 	,
 	"admin": {

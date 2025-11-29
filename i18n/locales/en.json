@@ -30,7 +30,12 @@
 		   "password_placeholder": "Enter your password",
 		   "signing_in": "Signing in…",
 		   "logging_in": "Logging in...",
-		   "login_btn": "Login"
+		"login_btn": "Login",
+		"errors": {
+			"missing_fields": "Please provide both username and password.",
+			"invalid_credentials": "Invalid username or password.",
+			"server": "Server error. Please try again later."
+		}
 	   },
 	   "mesplats": {
 		   "title": "My dishes",

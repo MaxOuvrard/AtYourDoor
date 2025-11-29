@@ -45,6 +45,7 @@
 <script setup lang="ts">
 
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../../../stores/userStore'
 import { useSeoMeta } from 'nuxt/app';
@@ -64,6 +65,7 @@ const loading = ref(false)
 const error = ref('')
 const router = useRouter()
 const userStore = useUserStore()
+const { t } = useI18n()
 
 // Build slides array from images in public/images/home
 const slides = [
@@ -80,7 +82,12 @@ async function handleLogin() {
     const res: any = await userStore.login(username.value, password.value)
     // Si l'API retourne une erreur explicite
     if (res && typeof res === 'object' && 'error' in res && res.error) {
-      error.value = res.error
+      // Translate server error keys (e.g. "login.errors.invalid_credentials")
+      try {
+        error.value = typeof res.error === 'string' ? t(res.error as string) : String(res.error)
+      } catch (e) {
+        error.value = String(res.error)
+      }
       return
     }
     // Si le store a bien été mis à jour, on utilise userStore.user

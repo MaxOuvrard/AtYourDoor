@@ -15,7 +15,7 @@
   },
   {
     "id": 1764189955749,
-    "name": "Le Freti 3",
+    "name": "Le Freti 4",
     "email": "freti@gmail.com",
     "password": "oui",
     "role": "OWNER"
@@ -46,6 +46,13 @@
     "name": "E2E User 1764369560703",
     "email": "e2e-1764369560703@example.com",
     "password": "password123",
+    "role": "USER"
+  },
+  {
+    "id": 1764374275871,
+    "name": "test2",
+    "email": "test@test.com",
+    "password": "test",
     "role": "USER"
   }
 ]

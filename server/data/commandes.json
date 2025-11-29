@@ -21,7 +21,7 @@
     "total": 30,
     "status": "preparing",
     "createdAt": "2025-11-28T21:30:48.251Z",
-    "updatedAt": "2025-11-28T21:48:16.372Z"
+    "updatedAt": "2025-11-29T00:03:41.464Z"
   },
   {
     "id": 1764367173020,
@@ -40,5 +40,23 @@
     "status": "pending",
     "createdAt": "2025-11-28T21:59:33.020Z",
     "updatedAt": "2025-11-28T21:59:33.023Z"
+  },
+  {
+    "id": 1764374561233,
+    "name": "wgfd",
+    "userId": 1764374275871,
+    "id_restaurant": 4,
+    "plats": [
+      {
+        "id": 7,
+        "name": "Paella mixta",
+        "price": 20,
+        "quantity": 1
+      }
+    ],
+    "total": 20,
+    "status": "pending",
+    "createdAt": "2025-11-29T00:02:41.233Z",
+    "updatedAt": "2025-11-29T00:02:41.236Z"
   }
 ]

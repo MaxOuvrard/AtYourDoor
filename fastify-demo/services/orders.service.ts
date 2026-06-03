@@ -5,6 +5,7 @@ import {
   NotFoundError,
 } from "../common/exceptions.js";
 import type { CreateOrderRequest, StatusUpdateRequest } from "../schemas/orders.schema.js";
+import { notifyRestaurant } from "./websocket.service.js";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING: ["CONFIRMED"],
@@ -64,7 +65,7 @@ export class OrderService {
       return sum + Number(dish.price) * item.quantity;
     }, 0);
 
-    return this.prisma.commande.create({
+    const order = await this.prisma.commande.create({
       data: {
         userId,
         restaurantId: data.restaurantId,
@@ -83,6 +84,15 @@ export class OrderService {
       },
       include: ORDER_INCLUDE,
     });
+
+    notifyRestaurant(data.restaurantId, "new-order", {
+      orderId: order.id,
+      totalPrice: Number(order.totalPrice),
+      itemCount: order.commandePlats.length,
+      createdAt: order.createdAt,
+    });
+
+    return order;
   }
 
   async getOrderById(

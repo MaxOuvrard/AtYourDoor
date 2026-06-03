@@ -1,7 +1,9 @@
 import "./config/dotenvx.js";
 import fastify from "fastify";
 import cors from "@fastify/cors";
+import websocketPlugin from "@fastify/websocket";
 import { registerRoutes } from "./routes/index.js";
+import { websocketRoutes } from "./routes/websocket.js";
 import { buildErrorHandler } from "./common/errorHandler.js";
 import jwtDecorator from "./decorators/jwtDecorator.js";
 import { prisma } from "./prisma/prismaInstance.js";
@@ -21,6 +23,8 @@ const start = async () => {
 
     await server.register(cors, {});
     await server.register(jwtDecorator);
+    await server.register(websocketPlugin);
+    await server.register(websocketRoutes);
     await registerRoutes(server);
     await server.ready();
     await server.listen({ port, host });

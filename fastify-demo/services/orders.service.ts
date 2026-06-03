@@ -4,7 +4,11 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "../common/exceptions.js";
-import type { CreateOrderRequest, StatusUpdateRequest } from "../schemas/orders.schema.js";
+import type {
+  CreateOrderRequest,
+  StatusUpdateRequest,
+  OrderFilterQuery,
+} from "../schemas/orders.schema.js";
 import { notifyRestaurant } from "./websocket.service.js";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -30,27 +34,16 @@ export class OrderService {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: data.restaurantId },
     });
-
-    if (!restaurant) {
-      throw new NotFoundError("Restaurant non trouvé");
-    }
+    if (!restaurant) throw new NotFoundError("Restaurant non trouvé");
 
     const dishIds = data.items.map((i) => i.dishId);
-    const dishes = await this.prisma.plat.findMany({
-      where: { id: { in: dishIds } },
-    });
+    const dishes = await this.prisma.plat.findMany({ where: { id: { in: dishIds } } });
 
     if (dishes.length !== dishIds.length) {
       throw new NotFoundError("Un ou plusieurs plats sont introuvables");
     }
-
-    const wrongRestaurant = dishes.some(
-      (d) => d.restaurantId !== data.restaurantId,
-    );
-    if (wrongRestaurant) {
-      throw new BadRequestError(
-        "Tous les plats doivent appartenir au même restaurant",
-      );
+    if (dishes.some((d) => d.restaurantId !== data.restaurantId)) {
+      throw new BadRequestError("Tous les plats doivent appartenir au même restaurant");
     }
 
     const unavailable = dishes.filter((d) => !d.available);
@@ -74,11 +67,7 @@ export class OrderService {
         commandePlats: {
           create: data.items.map((item) => {
             const dish = dishes.find((d) => d.id === item.dishId)!;
-            return {
-              platId: item.dishId,
-              quantity: item.quantity,
-              unitPrice: Number(dish.price),
-            };
+            return { platId: item.dishId, quantity: item.quantity, unitPrice: Number(dish.price) };
           }),
         },
       },
@@ -95,31 +84,17 @@ export class OrderService {
     return order;
   }
 
-  async getOrderById(
-    orderId: string,
-    requesterId: string,
-    requesterRole: string,
-  ) {
+  async getOrderById(orderId: string, requesterId: string, requesterRole: string) {
     const order = await this.prisma.commande.findUnique({
       where: { id: orderId },
-      include: {
-        ...ORDER_INCLUDE,
-        restaurant: { select: { ownerId: true } },
-      },
+      include: { ...ORDER_INCLUDE, restaurant: { select: { ownerId: true } } },
     });
-
-    if (!order) {
-      throw new NotFoundError("Commande non trouvée");
-    }
+    if (!order) throw new NotFoundError("Commande non trouvée");
 
     if (requesterRole === "USER" && order.userId !== requesterId) {
       throw new ForbiddenError("Accès non autorisé à cette commande");
     }
-
-    if (
-      requesterRole === "RESTAURANT" &&
-      order.restaurant.ownerId !== requesterId
-    ) {
+    if (requesterRole === "RESTAURANT" && order.restaurant.ownerId !== requesterId) {
       throw new ForbiddenError("Accès non autorisé à cette commande");
     }
 
@@ -127,53 +102,62 @@ export class OrderService {
     return orderWithoutRestaurant;
   }
 
-  async getUserOrders(userId: string) {
-    return this.prisma.commande.findMany({
-      where: { userId },
-      include: ORDER_INCLUDE,
-      orderBy: { createdAt: "desc" },
-    });
+  async getUserOrders(userId: string, params: OrderFilterQuery = {}) {
+    const limit = params.limit ?? 20;
+    const offset = params.offset ?? 0;
+    const where: Record<string, unknown> = { userId };
+    if (params.status) where.status = params.status;
+
+    const [data, total] = await Promise.all([
+      this.prisma.commande.findMany({
+        where,
+        include: ORDER_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        skip: offset,
+        take: limit,
+      }),
+      this.prisma.commande.count({ where }),
+    ]);
+
+    return { data, pagination: { total, limit, offset } };
   }
 
-  async getRestaurantOrders(ownerId: string) {
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { ownerId },
-    });
+  async getRestaurantOrders(ownerId: string, params: OrderFilterQuery = {}) {
+    const restaurant = await this.prisma.restaurant.findUnique({ where: { ownerId } });
+    if (!restaurant) throw new NotFoundError("Aucun restaurant associé à ce compte");
 
-    if (!restaurant) {
-      throw new NotFoundError("Aucun restaurant associé à ce compte");
-    }
+    const limit = params.limit ?? 20;
+    const offset = params.offset ?? 0;
+    const where: Record<string, unknown> = { restaurantId: restaurant.id };
+    if (params.status) where.status = params.status;
 
-    return this.prisma.commande.findMany({
-      where: { restaurantId: restaurant.id },
-      include: ORDER_INCLUDE,
-      orderBy: { createdAt: "desc" },
-    });
+    const [data, total] = await Promise.all([
+      this.prisma.commande.findMany({
+        where,
+        include: ORDER_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        skip: offset,
+        take: limit,
+      }),
+      this.prisma.commande.count({ where }),
+    ]);
+
+    return { data, pagination: { total, limit, offset } };
   }
 
-  async updateOrderStatus(
-    orderId: string,
-    ownerId: string,
-    data: StatusUpdateRequest,
-  ) {
+  async updateOrderStatus(orderId: string, ownerId: string, data: StatusUpdateRequest) {
     const order = await this.prisma.commande.findUnique({
       where: { id: orderId },
       include: { restaurant: { select: { ownerId: true } } },
     });
-
-    if (!order) {
-      throw new NotFoundError("Commande non trouvée");
-    }
-
+    if (!order) throw new NotFoundError("Commande non trouvée");
     if (order.restaurant.ownerId !== ownerId) {
       throw new ForbiddenError("Accès non autorisé à cette commande");
     }
 
     const allowed = VALID_TRANSITIONS[order.status] ?? [];
     if (!allowed.includes(data.status)) {
-      throw new BadRequestError(
-        `Transition invalide : ${order.status} → ${data.status}`,
-      );
+      throw new BadRequestError(`Transition invalide : ${order.status} → ${data.status}`);
     }
 
     return this.prisma.commande.update({
@@ -184,22 +168,11 @@ export class OrderService {
   }
 
   async cancelOrder(orderId: string, userId: string) {
-    const order = await this.prisma.commande.findUnique({
-      where: { id: orderId },
-    });
-
-    if (!order) {
-      throw new NotFoundError("Commande non trouvée");
-    }
-
-    if (order.userId !== userId) {
-      throw new ForbiddenError("Accès non autorisé à cette commande");
-    }
-
+    const order = await this.prisma.commande.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundError("Commande non trouvée");
+    if (order.userId !== userId) throw new ForbiddenError("Accès non autorisé à cette commande");
     if (order.status !== "PENDING") {
-      throw new BadRequestError(
-        "Seules les commandes en attente peuvent être annulées",
-      );
+      throw new BadRequestError("Seules les commandes en attente peuvent être annulées");
     }
 
     return this.prisma.commande.update({

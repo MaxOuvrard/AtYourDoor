@@ -47,5 +47,7 @@ export const restaurantSchema = /* GraphQL */ `
   type Query {
     restaurants: [Restaurant!]!
     restaurant(id: ID!): Restaurant
+    dishes(restaurantId: ID): [Dish!]!
+    orders: [Order!]!
   }
 `;

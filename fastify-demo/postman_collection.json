@@ -1,0 +1,421 @@
+{
+  "info": {
+    "name": "AtYourDoor API",
+    "_postman_id": "atyourdoor-api-collection",
+    "description": "Collection complète — Fastify + Prisma + MariaDB",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "restaurant_token", "value": "", "type": "string" },
+    { "key": "restaurant_id", "value": "", "type": "string" },
+    { "key": "dish_id", "value": "", "type": "string" },
+    { "key": "order_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  pm.collectionVariables.set('token', pm.response.json().token);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 200) {",
+                "  pm.collectionVariables.set('token', pm.response.json().token);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Me (profil)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "Update my profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Martin\",\n  \"phone\": \"0601020304\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "Delete my account",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurants",
+      "item": [
+        {
+          "name": "List restaurants",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/restaurants?limit=10&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "offset", "value": "0" },
+                { "key": "name", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get restaurant by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["restaurants", "{{restaurant_id}}"] }
+          }
+        },
+        {
+          "name": "Create restaurant (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"owner@restaurant.com\",\n  \"password\": \"secure123\",\n  \"name\": \"La Bella Pizza\",\n  \"address\": \"10 rue de Rome, 75001 Paris\",\n  \"phone\": \"0142000000\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/restaurants", "host": ["{{base_url}}"], "path": ["restaurants"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  pm.collectionVariables.set('restaurant_id', pm.response.json().id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Get my restaurant (RESTAURANT)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{restaurant_token}}" }],
+            "url": { "raw": "{{base_url}}/restaurants/me", "host": ["{{base_url}}"], "path": ["restaurants", "me"] }
+          }
+        },
+        {
+          "name": "Update my restaurant (RESTAURANT)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{restaurant_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Pizzas napolitaines au feu de bois\",\n  \"status\": \"OPEN\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/restaurants/me", "host": ["{{base_url}}"], "path": ["restaurants", "me"] }
+          }
+        },
+        {
+          "name": "Delete restaurant",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{restaurant_token}}" }],
+            "url": { "raw": "{{base_url}}/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["restaurants", "{{restaurant_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dishes",
+      "item": [
+        {
+          "name": "List dishes by restaurant",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/restaurants/{{restaurant_id}}/dishes?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants", "{{restaurant_id}}", "dishes"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get dish by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/dishes/{{dish_id}}", "host": ["{{base_url}}"], "path": ["dishes", "{{dish_id}}"] }
+          }
+        },
+        {
+          "name": "Create dish (RESTAURANT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{restaurant_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Margherita\",\n  \"description\": \"Tomate, mozzarella, basilic\",\n  \"price\": 12.50\n}"
+            },
+            "url": { "raw": "{{base_url}}/dishes", "host": ["{{base_url}}"], "path": ["dishes"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  pm.collectionVariables.set('dish_id', pm.response.json().id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update dish (RESTAURANT)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{restaurant_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 13.90,\n  \"available\": true\n}"
+            },
+            "url": { "raw": "{{base_url}}/dishes/{{dish_id}}", "host": ["{{base_url}}"], "path": ["dishes", "{{dish_id}}"] }
+          }
+        },
+        {
+          "name": "Delete dish (RESTAURANT)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{restaurant_token}}" }],
+            "url": { "raw": "{{base_url}}/dishes/{{dish_id}}", "host": ["{{base_url}}"], "path": ["dishes", "{{dish_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create order (USER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantId\": \"{{restaurant_id}}\",\n  \"deliveryAddress\": \"5 avenue de l'Opéra, 75001 Paris\",\n  \"items\": [\n    { \"dishId\": \"{{dish_id}}\", \"quantity\": 2 }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  pm.collectionVariables.set('order_id', pm.response.json().id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "My orders (USER)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/orders/me?limit=10&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "me"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "offset", "value": "0" },
+                { "key": "status", "value": "PENDING", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
+          }
+        },
+        {
+          "name": "Restaurant orders (RESTAURANT)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{restaurant_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/restaurants/me/orders?limit=10&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants", "me", "orders"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "offset", "value": "0" },
+                { "key": "status", "value": "PENDING", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update order status (RESTAURANT)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{restaurant_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders/{{order_id}}/status", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}", "status"] }
+          }
+        },
+        {
+          "name": "Cancel order (USER, PENDING only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "List restaurants",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"{ restaurants { id name address status dishes { name price } } }\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/graphql", "host": ["http://localhost:3000"], "path": ["graphql"] }
+          }
+        },
+        {
+          "name": "Get restaurant by ID",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($id: ID!) { restaurant(id: $id) { id name dishes { name price available } } }\",\n  \"variables\": { \"id\": \"{{restaurant_id}}\" }\n}"
+            },
+            "url": { "raw": "http://localhost:3000/graphql", "host": ["http://localhost:3000"], "path": ["graphql"] }
+          }
+        },
+        {
+          "name": "List dishes",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($restaurantId: ID) { dishes(restaurantId: $restaurantId) { id name price available } }\",\n  \"variables\": { \"restaurantId\": \"{{restaurant_id}}\" }\n}"
+            },
+            "url": { "raw": "http://localhost:3000/graphql", "host": ["http://localhost:3000"], "path": ["graphql"] }
+          }
+        },
+        {
+          "name": "My orders (auth required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"{ orders { id status totalPrice deliveryAddress items { quantity unitPrice } } }\"\n}"
+            },
+            "url": { "raw": "http://localhost:3000/graphql", "host": ["http://localhost:3000"], "path": ["graphql"] }
+          }
+        }
+      ]
+    }
+  ]
+}

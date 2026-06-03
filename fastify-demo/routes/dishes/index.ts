@@ -5,31 +5,37 @@ import {
   CreateDishSchema,
   UpdateDishSchema,
   DishResponseSchema,
+  PaginatedDishesSchema,
   type CreateDishRequest,
   type UpdateDishRequest,
 } from "../../schemas/dishes.schema.js";
+import { PaginationQuerySchema, type PaginationParams } from "../../schemas/pagination.schema.js";
 import { ErrorResponseSchema } from "../../schemas/error.schema.js";
 
 export const dishRoutes = async (app: FastifyInstance) => {
   const service = new DishService(app.prisma);
 
-  // GET /restaurants/:restaurantId/dishes — public
-  app.get<{ Params: { restaurantId: string } }>(
+  // GET /restaurants/:restaurantId/dishes — public, paginé
+  app.get<{ Params: { restaurantId: string }; Querystring: PaginationParams }>(
     "/restaurants/:restaurantId/dishes",
     {
       schema: {
+        tags: ["dishes"],
+        summary: "Lister les plats d'un restaurant",
         params: Type.Object({ restaurantId: Type.String() }),
+        querystring: PaginationQuerySchema,
         response: {
-          200: Type.Array(DishResponseSchema),
+          200: PaginatedDishesSchema,
           404: ErrorResponseSchema,
         },
       },
     },
     async (request, reply) => {
-      const dishes = await service.getDishesByRestaurant(
+      const result = await service.getDishesByRestaurant(
         request.params.restaurantId,
+        request.query,
       );
-      return reply.send(dishes);
+      return reply.send(result);
     },
   );
 
@@ -38,11 +44,10 @@ export const dishRoutes = async (app: FastifyInstance) => {
     "/dishes/:id",
     {
       schema: {
+        tags: ["dishes"],
+        summary: "Détails d'un plat",
         params: Type.Object({ id: Type.String() }),
-        response: {
-          200: DishResponseSchema,
-          404: ErrorResponseSchema,
-        },
+        response: { 200: DishResponseSchema, 404: ErrorResponseSchema },
       },
     },
     async (request, reply) => {
@@ -51,12 +56,14 @@ export const dishRoutes = async (app: FastifyInstance) => {
     },
   );
 
-  // POST /dishes — RESTAURANT seulement
+  // POST /dishes — RESTAURANT
   app.post<{ Body: CreateDishRequest }>(
     "/dishes",
     {
       preHandler: app.authorize(["RESTAURANT"]),
       schema: {
+        tags: ["dishes"],
+        summary: "Créer un plat",
         body: CreateDishSchema,
         response: {
           201: DishResponseSchema,
@@ -72,12 +79,14 @@ export const dishRoutes = async (app: FastifyInstance) => {
     },
   );
 
-  // PATCH /dishes/:id — RESTAURANT seulement (propriétaire du restaurant)
+  // PATCH /dishes/:id — RESTAURANT (propriétaire)
   app.patch<{ Params: { id: string }; Body: UpdateDishRequest }>(
     "/dishes/:id",
     {
       preHandler: app.authorize(["RESTAURANT"]),
       schema: {
+        tags: ["dishes"],
+        summary: "Modifier un plat",
         params: Type.Object({ id: Type.String() }),
         body: UpdateDishSchema,
         response: {
@@ -89,21 +98,19 @@ export const dishRoutes = async (app: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const dish = await service.updateDish(
-        request.params.id,
-        request.user.id,
-        request.body,
-      );
+      const dish = await service.updateDish(request.params.id, request.user.id, request.body);
       return reply.send(dish);
     },
   );
 
-  // DELETE /dishes/:id — RESTAURANT seulement (propriétaire du restaurant)
+  // DELETE /dishes/:id — RESTAURANT (propriétaire)
   app.delete<{ Params: { id: string } }>(
     "/dishes/:id",
     {
       preHandler: app.authorize(["RESTAURANT"]),
       schema: {
+        tags: ["dishes"],
+        summary: "Supprimer un plat",
         params: Type.Object({ id: Type.String() }),
         response: {
           200: DishResponseSchema,

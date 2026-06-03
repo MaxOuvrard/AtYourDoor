@@ -1,40 +1,46 @@
 import { FastifyInstance } from "fastify";
+import { Type } from "@sinclair/typebox";
 import { RestaurantService } from "../../services/restaurants.service.js";
 import {
   CreateRestaurantSchema,
   UpdateRestaurantSchema,
+  RestaurantListQuerySchema,
   RestaurantResponseSchema,
+  PaginatedRestaurantsSchema,
   type CreateRestaurantRequest,
   type UpdateRestaurantRequest,
+  type RestaurantListQuery,
 } from "../../schemas/restaurants.schema.js";
 import { ErrorResponseSchema } from "../../schemas/error.schema.js";
-import { Type } from "@sinclair/typebox";
 
 export const restaurantRoutes = async (app: FastifyInstance) => {
   const service = new RestaurantService(app.prisma);
 
-  // GET /restaurants — public
-  app.get(
+  // GET /restaurants — public, paginé, filtrable
+  app.get<{ Querystring: RestaurantListQuery }>(
     "/restaurants",
     {
       schema: {
-        response: {
-          200: Type.Array(RestaurantResponseSchema),
-        },
+        tags: ["restaurants"],
+        summary: "Lister tous les restaurants",
+        querystring: RestaurantListQuerySchema,
+        response: { 200: PaginatedRestaurantsSchema },
       },
     },
-    async (_request, reply) => {
-      const restaurants = await service.getAllRestaurants();
-      return reply.send(restaurants);
+    async (request, reply) => {
+      const result = await service.getAllRestaurants(request.query);
+      return reply.send(result);
     },
   );
 
-  // GET /restaurants/me — propriétaire uniquement
+  // GET /restaurants/me — propriétaire
   app.get(
     "/restaurants/me",
     {
       preHandler: app.authorize(["RESTAURANT"]),
       schema: {
+        tags: ["restaurants"],
+        summary: "Récupérer son restaurant",
         response: {
           200: RestaurantResponseSchema,
           401: ErrorResponseSchema,
@@ -49,12 +55,34 @@ export const restaurantRoutes = async (app: FastifyInstance) => {
     },
   );
 
-  // POST /restaurants — ADMIN seulement
+  // GET /restaurants/:id — public
+  app.get<{ Params: { id: string } }>(
+    "/restaurants/:id",
+    {
+      schema: {
+        tags: ["restaurants"],
+        summary: "Détails d'un restaurant",
+        params: Type.Object({ id: Type.String() }),
+        response: {
+          200: RestaurantResponseSchema,
+          404: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const restaurant = await service.getRestaurantById(request.params.id);
+      return reply.send(restaurant);
+    },
+  );
+
+  // POST /restaurants — ADMIN
   app.post<{ Body: CreateRestaurantRequest }>(
     "/restaurants",
     {
       preHandler: app.authorize(["ADMIN"]),
       schema: {
+        tags: ["restaurants"],
+        summary: "Créer un restaurant (ADMIN)",
         body: CreateRestaurantSchema,
         response: {
           201: RestaurantResponseSchema,
@@ -70,12 +98,14 @@ export const restaurantRoutes = async (app: FastifyInstance) => {
     },
   );
 
-  // PATCH /restaurants/me — propriétaire uniquement
+  // PATCH /restaurants/me — propriétaire
   app.patch<{ Body: UpdateRestaurantRequest }>(
     "/restaurants/me",
     {
       preHandler: app.authorize(["RESTAURANT"]),
       schema: {
+        tags: ["restaurants"],
+        summary: "Modifier son restaurant",
         body: UpdateRestaurantSchema,
         response: {
           200: RestaurantResponseSchema,
@@ -86,11 +116,35 @@ export const restaurantRoutes = async (app: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const restaurant = await service.updateMyRestaurant(
-        request.user.id,
-        request.body,
-      );
+      const restaurant = await service.updateMyRestaurant(request.user.id, request.body);
       return reply.send(restaurant);
+    },
+  );
+
+  // DELETE /restaurants/:id — propriétaire ou ADMIN
+  app.delete<{ Params: { id: string } }>(
+    "/restaurants/:id",
+    {
+      preHandler: app.authorize(["RESTAURANT", "ADMIN"]),
+      schema: {
+        tags: ["restaurants"],
+        summary: "Supprimer un restaurant",
+        params: Type.Object({ id: Type.String() }),
+        response: {
+          204: Type.Null(),
+          401: ErrorResponseSchema,
+          403: ErrorResponseSchema,
+          404: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      await service.deleteRestaurant(
+        request.params.id,
+        request.user.id,
+        request.user.role,
+      );
+      return reply.status(204).send();
     },
   );
 };

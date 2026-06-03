@@ -3,7 +3,7 @@ import { Type, Static } from "@sinclair/typebox";
 export const LoginSchema = Type.Object(
   {
     email: Type.String({ format: "email" }),
-    password: Type.String({ minLength: 2 }),
+    password: Type.String({ minLength: 6 }),
   },
   { additionalProperties: false }
 );
@@ -11,7 +11,7 @@ export const LoginSchema = Type.Object(
 export const RegisterSchema = Type.Object(
   {
     email: Type.String({ format: "email" }),
-    password: Type.String({ minLength: 2 }),
+    password: Type.String({ minLength: 6 }),
   },
   { additionalProperties: false }
 );

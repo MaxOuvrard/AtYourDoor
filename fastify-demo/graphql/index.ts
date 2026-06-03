@@ -1,12 +1,22 @@
 import mercurius from "mercurius";
 import type { FastifyInstance } from "fastify";
+import type { PrismaClient } from "../generated/prisma/client.js";
 import { restaurantSchema } from "./restaurant.schema.js";
 import { restaurantResolvers } from "./restaurant.resolvers.js";
+
+// Étend MercuriusContext avec prisma + user pour que les resolvers soient typés
+declare module "mercurius" {
+  interface MercuriusContext {
+    prisma: PrismaClient;
+    user: { id: string; role: string } | null;
+  }
+}
 
 export async function registerGraphQL(app: FastifyInstance) {
   await app.register(mercurius, {
     schema: restaurantSchema,
-    resolvers: restaurantResolvers,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolvers: restaurantResolvers as any,
     graphiql: true,
     context: async (request) => {
       let user: { id: string; role: string } | null = null;

@@ -4,7 +4,7 @@ export const CreateDishSchema = Type.Object(
   {
     name: Type.String({ minLength: 1 }),
     description: Type.Optional(Type.String()),
-    price: Type.Number({ minimum: 0, exclusiveMinimum: true }),
+    price: Type.Number({ exclusiveMinimum: 0 }),
     imageUrl: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
@@ -14,7 +14,7 @@ export const UpdateDishSchema = Type.Object(
   {
     name: Type.Optional(Type.String({ minLength: 1 })),
     description: Type.Optional(Type.String()),
-    price: Type.Optional(Type.Number({ minimum: 0, exclusiveMinimum: true })),
+    price: Type.Optional(Type.Number({ exclusiveMinimum: 0 })),
     imageUrl: Type.Optional(Type.String()),
     available: Type.Optional(Type.Boolean()),
   },

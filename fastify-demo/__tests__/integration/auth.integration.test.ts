@@ -60,6 +60,10 @@ describe("Authentication Integration Tests", () => {
       });
 
       expect(response.statusCode).toBe(400);
+
+      // Vérifier que l'utilisateur n'est PAS dans la base de données
+      const count = await prisma.user.count();
+      expect(count).toBe(0);
     });
 
     it("should return 409 when email already exists", async () => {
@@ -84,6 +88,10 @@ describe("Authentication Integration Tests", () => {
       expect(response.statusCode).toBe(409);
       expect(response.json()).toHaveProperty("type");
       expect(response.json().type).toContain("conflict");
+
+      // Vérifier qu'il n'y a qu'UN utilisateur en base
+      const count = await prisma.user.count();
+      expect(count).toBe(1);
     });
 
     it("should reject registration with missing password", async () => {
@@ -131,7 +139,10 @@ describe("Authentication Integration Tests", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toHaveProperty("token");
-      expect(typeof response.json().token).toBe("string");
+
+      const token = response.json().token;
+      expect(typeof token).toBe("string");
+      expect(token).toBeTruthy(); // non-vide
     });
 
     it("should return 401 for non-existent user", async () => {

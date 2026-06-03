@@ -1,15 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
+import { hash } from "bcryptjs";
 import { createTestServer, closeTestServer } from "../utils/test-setup.js";
 import { prisma } from "../../prisma/prismaInstance.js";
 
-describe("Posts Routes Integration Tests", () => {
+/**
+ * Tests d'intégration — Commandes
+ * Couvre : création, lecture, changement de statut, annulation, permissions.
+ */
+describe("Orders Integration Tests", () => {
   let server: FastifyInstance;
-  let userToken1: string;
-  let userToken2: string;
-  let userId1: string;
-  let userId2: string;
-  let postId1: string;
+  let userToken: string;
+  let restaurantToken: string;
+  let restaurantId: string;
+  let dishId: string;
 
   beforeAll(async () => {
     server = await createTestServer();
@@ -21,455 +25,351 @@ describe("Posts Routes Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    // Nettoyer la base de données
-    await prisma.comment.deleteMany();
-    await prisma.post.deleteMany();
+    // Nettoyage dans l'ordre des dépendances
+    await prisma.commandePlat.deleteMany();
+    await prisma.commande.deleteMany();
+    await prisma.plat.deleteMany();
+    await prisma.restaurant.deleteMany();
     await prisma.user.deleteMany();
 
-    // Créer deux utilisateurs
-    const user1Response = await server.inject({
-      method: "POST",
-      url: "/api/auth/register",
-      payload: {
-        email: "user1@example.com",
-        password: "password123",
+    // Utilisateur régulier
+    const userPwd = await hash("UserPass1!", 10);
+    const user = await prisma.user.create({
+      data: { email: "user@test.com", password: userPwd, role: "USER" },
+    });
+    userToken = server.jwt.sign({ id: user.id });
+
+    // Propriétaire de restaurant
+    const ownerPwd = await hash("OwnerPass1!", 10);
+    const owner = await prisma.user.create({
+      data: { email: "owner@test.com", password: ownerPwd, role: "RESTAURANT" },
+    });
+    restaurantToken = server.jwt.sign({ id: owner.id });
+
+    // Restaurant + plat
+    const restaurant = await prisma.restaurant.create({
+      data: {
+        name: "Test Resto",
+        address: "1 rue Test",
+        ownerId: owner.id,
       },
     });
+    restaurantId = restaurant.id;
 
-    if (user1Response.statusCode !== 201) {
-      console.error("User 1 registration failed:", user1Response.json());
-    }
-    userToken1 = user1Response.json().token;
-    const user1 = await prisma.user.findUnique({
-      where: { email: "user1@example.com" },
-    });
-    userId1 = user1!.id;
-
-    const user2Response = await server.inject({
-      method: "POST",
-      url: "/api/auth/register",
-      payload: {
-        email: "user2@example.com",
-        password: "password123",
+    const dish = await prisma.plat.create({
+      data: {
+        name: "Burger",
+        price: 12.5,
+        restaurantId: restaurant.id,
       },
     });
-
-    if (user2Response.statusCode !== 201) {
-      console.error(
-        "User 2 registration failed - Status:",
-        user2Response.statusCode,
-        "Response:",
-        user2Response.json(),
-      );
-    }
-    userToken2 = user2Response.json().token;
-    const user2 = await prisma.user.findUnique({
-      where: { email: "user2@example.com" },
-    });
-    userId2 = user2!.id;
-
-    // Créer un post pour l'utilisateur 1
-    const postResponse = await server.inject({
-      method: "POST",
-      url: "/api/posts",
-      headers: {
-        authorization: `Bearer ${userToken1}`,
-      },
-      payload: {
-        text: "Post by user 1",
-      },
-    });
-
-    postId1 = postResponse.json().id;
+    dishId = dish.id;
   });
 
-  describe("GET /api/posts", () => {
-    it("should return all posts", async () => {
+  // ── Création ───────────────────────────────────────────────────────────────
+
+  describe("POST /api/orders", () => {
+    it("should create an order and return 201", async () => {
       const response = await server.inject({
-        method: "GET",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      console.log("data sent", {
-        method: "GET",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(Array.isArray(response.json())).toBe(true);
-      expect(response.json().length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("should include user information in posts", async () => {
-      const response = await server.inject({
-        method: "GET",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      expect(response.statusCode).toBe(200);
-      const posts = response.json();
-      console.log("Posts retrieved:", posts);
-      expect(posts[0]).toHaveProperty("userId");
-    });
-
-    it("should order posts by creation date descending", async () => {
-      // Créer un autre post
-      await server.inject({
         method: "POST",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
         payload: {
-          text: "Second post",
-        },
-      });
-
-      const response = await server.inject({
-        method: "GET",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      const posts = response.json();
-      expect(new Date(posts[0].createdAt).getTime()).toBeGreaterThanOrEqual(
-        new Date(posts[1].createdAt).getTime(),
-      );
-    });
-  });
-
-  describe("GET /api/posts/:id", () => {
-    it("should return a post by id", async () => {
-      const response = await server.inject({
-        method: "GET",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(response.json().id).toBe(postId1);
-      expect(response.json().text).toBe("Post by user 1");
-    });
-
-    it("should return 404 for non-existent post", async () => {
-      const response = await server.inject({
-        method: "GET",
-        url: `/api/posts/non-existent-id`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      expect(response.statusCode).toBe(404);
-    });
-
-    it("should include comments in post details", async () => {
-      // Ajouter un commentaire au post
-      const commentPayload = {
-        content: "Test comment",
-      };
-
-      await server.inject({
-        method: "POST",
-        url: `/api/posts/${postId1}/comments`,
-        headers: {
-          authorization: `Bearer ${userToken2}`,
-        },
-        payload: commentPayload,
-      });
-
-      const response = await server.inject({
-        method: "GET",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      console.log(response.json(), "cest la reponse");
-
-      expect(response.statusCode).toBe(200);
-      expect(response.json()).toHaveProperty("comments");
-      expect(Array.isArray(response.json().comments)).toBe(true);
-    });
-  });
-
-  describe("POST /api/posts", () => {
-    it("should create a new post", async () => {
-      const response = await server.inject({
-        method: "POST",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-        payload: {
-          text: "New post",
+          restaurantId,
+          deliveryAddress: "2 rue Livraison",
+          items: [{ dishId, quantity: 2 }],
         },
       });
 
       expect(response.statusCode).toBe(201);
-      expect(response.json()).toHaveProperty("id");
-      expect(response.json().text).toBe("New post");
-      expect(response.json().userId).toBe(userId1);
+      const order = response.json();
+      expect(order).toHaveProperty("id");
+      expect(order.status).toBe("PENDING");
+      expect(Number(order.totalPrice)).toBeCloseTo(25);
+      expect(order.commandePlats).toHaveLength(1);
+      expect(order.commandePlats[0].quantity).toBe(2);
     });
 
-    it("should reject post without text field", async () => {
+    it("should return 400 when dish belongs to another restaurant", async () => {
+      const otherOwner = await prisma.user.create({
+        data: {
+          email: "other@test.com",
+          password: await hash("p", 10),
+          role: "RESTAURANT",
+        },
+      });
+      const otherResto = await prisma.restaurant.create({
+        data: { name: "Other", address: "3 rue Autre", ownerId: otherOwner.id },
+      });
+      const otherDish = await prisma.plat.create({
+        data: { name: "Pizza", price: 10, restaurantId: otherResto.id },
+      });
+
       const response = await server.inject({
         method: "POST",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
         payload: {
-          text: "", // Empty text
+          restaurantId,
+          deliveryAddress: "2 rue Livraison",
+          items: [
+            { dishId, quantity: 1 },
+            { dishId: otherDish.id, quantity: 1 },
+          ],
         },
       });
 
       expect(response.statusCode).toBe(400);
     });
 
-    it("should reject post without authorization", async () => {
+    it("should return 401 without authentication", async () => {
       const response = await server.inject({
         method: "POST",
-        url: "/api/posts",
+        url: "/api/orders",
         payload: {
-          text: "Unauthorized post",
+          restaurantId,
+          deliveryAddress: "2 rue Livraison",
+          items: [{ dishId, quantity: 1 }],
         },
       });
 
       expect(response.statusCode).toBe(401);
     });
 
-    it("should return 400 for missing text field", async () => {
+    it("should return 403 when RESTAURANT role tries to create an order", async () => {
       const response = await server.inject({
         method: "POST",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-        payload: {},
-      });
-
-      expect(response.statusCode).toBe(400);
-    });
-  });
-
-  describe("PUT /api/posts/:id", () => {
-    it("should update a post by owner", async () => {
-      const response = await server.inject({
-        method: "PUT",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${restaurantToken}` },
         payload: {
-          text: "Updated post text",
-        },
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(response.json().text).toBe("Updated post text");
-
-      // Vérifier que le post a réellement été mise à jour
-      const getResponse = await server.inject({
-        method: "GET",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      expect(getResponse.json().text).toBe("Updated post text");
-    });
-
-    it("should return 403 when non-owner tries to update post", async () => {
-      const response = await server.inject({
-        method: "PUT",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken2}`,
-        },
-        payload: {
-          text: "Hacked post",
+          restaurantId,
+          deliveryAddress: "2 rue Livraison",
+          items: [{ dishId, quantity: 1 }],
         },
       });
 
       expect(response.statusCode).toBe(403);
     });
-
-    it("should return 404 for non-existent post", async () => {
-      const response = await server.inject({
-        method: "PUT",
-        url: `/api/posts/non-existent-id`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-        payload: {
-          text: "Updated text",
-        },
-      });
-
-      expect(response.statusCode).toBe(404);
-    });
-
-    it("should return 401 without authorization", async () => {
-      const response = await server.inject({
-        method: "PUT",
-        url: `/api/posts/${postId1}`,
-        payload: {
-          text: "Updated text",
-        },
-      });
-
-      expect(response.statusCode).toBe(401);
-    });
   });
 
-  describe("DELETE /api/posts/:id", () => {
-    it("should delete a post by owner", async () => {
-      const response = await server.inject({
-        method: "DELETE",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
+  // ── Lecture ────────────────────────────────────────────────────────────────
 
-      expect(response.statusCode).toBe(204);
-
-      // Vérifier que le post n'existe plus
-      const getResponse = await server.inject({
-        method: "GET",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      expect(getResponse.statusCode).toBe(404);
-    });
-
-    it("should return 403 when non-owner tries to delete post", async () => {
-      const response = await server.inject({
-        method: "DELETE",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken2}`,
-        },
-      });
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should return 404 for non-existent post", async () => {
-      const response = await server.inject({
-        method: "DELETE",
-        url: `/api/posts/non-existent-id`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
-      });
-
-      expect(response.statusCode).toBe(404);
-    });
-
-    it("should return 401 without authorization", async () => {
-      const response = await server.inject({
-        method: "DELETE",
-        url: `/api/posts/${postId1}`,
-      });
-
-      expect(response.statusCode).toBe(401);
-    });
-
-    it("should cascade delete comments when post is deleted", async () => {
-      // Ajouter un commentaire
-      const commentResponse = await server.inject({
-        method: "POST",
-        url: `/api/posts/${postId1}/comments`,
-        headers: {
-          authorization: `Bearer ${userToken2}`,
-        },
-        payload: {
-          content: "Comment to be deleted",
-        },
-      });
-
-      const commentId = commentResponse.json().id;
-
-      // Supprimer le post
+  describe("GET /api/orders/me", () => {
+    it("should return the user's orders", async () => {
+      // Créer une commande
       await server.inject({
-        method: "DELETE",
-        url: `/api/posts/${postId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "2 rue Livraison",
+          items: [{ dishId, quantity: 1 }],
         },
       });
 
-      // Vérifier que le commentaire a été supprimé aussi
-      const comment = await prisma.comment.findUnique({
-        where: { id: commentId },
-      });
-
-      expect(comment).toBeNull();
-    });
-  });
-
-  describe("GET /api/posts/user/:userId", () => {
-    it("should return posts by specific user", async () => {
       const response = await server.inject({
         method: "GET",
-        url: `/api/posts/user/${userId1}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
+        url: "/api/orders/me",
+        headers: { authorization: `Bearer ${userToken}` },
       });
 
       expect(response.statusCode).toBe(200);
       expect(Array.isArray(response.json())).toBe(true);
-      expect(
-        response.json().every((post: any) => post.userId === userId1),
-      ).toBe(true);
+      expect(response.json().length).toBe(1);
     });
 
-    it("should return empty array for user with no posts", async () => {
-      // Créer un nouvel utilisateur
-      const user3Response = await server.inject({
-        method: "POST",
-        url: "/api/auth/register",
-        payload: {
-          email: "user3@example.com",
-          password: "password123",
-        },
+    it("should not see orders from another user", async () => {
+      const otherPwd = await hash("p", 10);
+      const other = await prisma.user.create({
+        data: { email: "other2@test.com", password: otherPwd, role: "USER" },
       });
+      const otherToken = server.jwt.sign({ id: other.id });
 
-      const user3 = await prisma.user.findUnique({
-        where: { email: "user3@example.com" },
+      await server.inject({
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "Adresse",
+          items: [{ dishId, quantity: 1 }],
+        },
       });
 
       const response = await server.inject({
         method: "GET",
-        url: `/api/posts/user/${user3!.id}`,
-        headers: {
-          authorization: `Bearer ${userToken1}`,
-        },
+        url: "/api/orders/me",
+        headers: { authorization: `Bearer ${otherToken}` },
       });
 
       expect(response.statusCode).toBe(200);
       expect(response.json().length).toBe(0);
+    });
+  });
+
+  describe("GET /api/restaurants/me/orders", () => {
+    it("should return orders for the restaurant owner", async () => {
+      await server.inject({
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "Adresse",
+          items: [{ dishId, quantity: 1 }],
+        },
+      });
+
+      const response = await server.inject({
+        method: "GET",
+        url: "/api/restaurants/me/orders",
+        headers: { authorization: `Bearer ${restaurantToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().length).toBe(1);
+    });
+  });
+
+  // ── Changement de statut ───────────────────────────────────────────────────
+
+  describe("PATCH /api/orders/:id/status", () => {
+    it("should advance order status through valid transitions", async () => {
+      const create = await server.inject({
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "Adresse",
+          items: [{ dishId, quantity: 1 }],
+        },
+      });
+      const orderId = create.json().id;
+
+      for (const status of ["CONFIRMED", "PREPARING", "READY"] as const) {
+        const res = await server.inject({
+          method: "PATCH",
+          url: `/api/orders/${orderId}/status`,
+          headers: { authorization: `Bearer ${restaurantToken}` },
+          payload: { status },
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.json().status).toBe(status);
+      }
+    });
+
+    it("should return 400 for invalid status transition", async () => {
+      const create = await server.inject({
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "Adresse",
+          items: [{ dishId, quantity: 1 }],
+        },
+      });
+      const orderId = create.json().id;
+
+      // PENDING → DELIVERED est invalide (saute des étapes)
+      const response = await server.inject({
+        method: "PATCH",
+        url: `/api/orders/${orderId}/status`,
+        headers: { authorization: `Bearer ${restaurantToken}` },
+        payload: { status: "DELIVERED" },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+  });
+
+  // ── Annulation ─────────────────────────────────────────────────────────────
+
+  describe("DELETE /api/orders/:id", () => {
+    it("should cancel a PENDING order", async () => {
+      const create = await server.inject({
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "Adresse",
+          items: [{ dishId, quantity: 1 }],
+        },
+      });
+      const orderId = create.json().id;
+
+      const response = await server.inject({
+        method: "DELETE",
+        url: `/api/orders/${orderId}`,
+        headers: { authorization: `Bearer ${userToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().status).toBe("CANCELLED");
+    });
+
+    it("should return 400 when trying to cancel a non-PENDING order", async () => {
+      const create = await server.inject({
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "Adresse",
+          items: [{ dishId, quantity: 1 }],
+        },
+      });
+      const orderId = create.json().id;
+
+      // Avancer à CONFIRMED
+      await server.inject({
+        method: "PATCH",
+        url: `/api/orders/${orderId}/status`,
+        headers: { authorization: `Bearer ${restaurantToken}` },
+        payload: { status: "CONFIRMED" },
+      });
+
+      const response = await server.inject({
+        method: "DELETE",
+        url: `/api/orders/${orderId}`,
+        headers: { authorization: `Bearer ${userToken}` },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    it("should return 403 when user tries to cancel another user's order", async () => {
+      const create = await server.inject({
+        method: "POST",
+        url: "/api/orders",
+        headers: { authorization: `Bearer ${userToken}` },
+        payload: {
+          restaurantId,
+          deliveryAddress: "Adresse",
+          items: [{ dishId, quantity: 1 }],
+        },
+      });
+      const orderId = create.json().id;
+
+      const other = await prisma.user.create({
+        data: {
+          email: "thief@test.com",
+          password: await hash("p", 10),
+          role: "USER",
+        },
+      });
+      const otherToken = server.jwt.sign({ id: other.id });
+
+      const response = await server.inject({
+        method: "DELETE",
+        url: `/api/orders/${orderId}`,
+        headers: { authorization: `Bearer ${otherToken}` },
+      });
+
+      expect(response.statusCode).toBe(403);
     });
   });
 });

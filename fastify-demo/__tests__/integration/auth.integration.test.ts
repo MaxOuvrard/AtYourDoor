@@ -16,9 +16,10 @@ describe("Authentication Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    // Nettoyer la base de données avant chaque test
-    await prisma.comment.deleteMany();
-    await prisma.post.deleteMany();
+    await prisma.commandePlat.deleteMany();
+    await prisma.commande.deleteMany();
+    await prisma.plat.deleteMany();
+    await prisma.restaurant.deleteMany();
     await prisma.user.deleteMany();
   });
 
@@ -40,12 +41,12 @@ describe("Authentication Integration Tests", () => {
       expect(token).toBeTruthy();
       expect(typeof token).toBe("string");
 
-      // Vérifier que l'utilisateur est créé
       const user = await prisma.user.findUnique({
         where: { email: "test@example.com" },
       });
       expect(user).toBeDefined();
       expect(user?.email).toBe("test@example.com");
+      expect(user?.password).not.toBe("password123");
     });
 
     it("should reject registration with invalid email format", async () => {
@@ -62,7 +63,6 @@ describe("Authentication Integration Tests", () => {
     });
 
     it("should return 409 when email already exists", async () => {
-      // Créer un premier utilisateur
       await server.inject({
         method: "POST",
         url: "/api/auth/register",
@@ -72,7 +72,6 @@ describe("Authentication Integration Tests", () => {
         },
       });
 
-      // Tentative de créer un utilisateur avec le même email
       const response = await server.inject({
         method: "POST",
         url: "/api/auth/register",
@@ -91,9 +90,7 @@ describe("Authentication Integration Tests", () => {
       const response = await server.inject({
         method: "POST",
         url: "/api/auth/register",
-        payload: {
-          email: "test@example.com",
-        },
+        payload: { email: "test@example.com" },
       });
 
       expect(response.statusCode).toBe(400);
@@ -103,9 +100,7 @@ describe("Authentication Integration Tests", () => {
       const response = await server.inject({
         method: "POST",
         url: "/api/auth/register",
-        payload: {
-          password: "password123",
-        },
+        payload: { password: "password123" },
       });
 
       expect(response.statusCode).toBe(400);
@@ -114,7 +109,6 @@ describe("Authentication Integration Tests", () => {
 
   describe("POST /api/auth/login", () => {
     beforeEach(async () => {
-      // Créer un utilisateur pour les tests de login
       await server.inject({
         method: "POST",
         url: "/api/auth/register",
@@ -170,9 +164,7 @@ describe("Authentication Integration Tests", () => {
       const response = await server.inject({
         method: "POST",
         url: "/api/auth/login",
-        payload: {
-          password: "password123",
-        },
+        payload: { password: "password123" },
       });
 
       expect(response.statusCode).toBe(400);
@@ -182,56 +174,48 @@ describe("Authentication Integration Tests", () => {
       const response = await server.inject({
         method: "POST",
         url: "/api/auth/login",
-        payload: {
-          email: "login@example.com",
-        },
+        payload: { email: "login@example.com" },
       });
 
       expect(response.statusCode).toBe(400);
     });
   });
 
-  describe("Protected Routes", () => {
+  describe("GET /api/auth/me", () => {
     let authToken: string;
-    let userId: string;
 
     beforeEach(async () => {
-      // Créer un utilisateur et obtenir son token
       const registerResponse = await server.inject({
         method: "POST",
         url: "/api/auth/register",
         payload: {
-          email: "protected@example.com",
+          email: "me@example.com",
           password: "password123",
         },
       });
 
       authToken = registerResponse.json().token;
-
-      // Récupérer l'ID de l'utilisateur depuis la base de données
-      const user = await prisma.user.findUnique({
-        where: { email: "protected@example.com" },
-      });
-      userId = user!.id;
     });
 
-    it("should allow access to protected route with valid token", async () => {
+    it("should return user profile with valid token", async () => {
       const response = await server.inject({
         method: "GET",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${authToken}`,
-        },
+        url: "/api/auth/me",
+        headers: { authorization: `Bearer ${authToken}` },
       });
 
       expect(response.statusCode).toBe(200);
-      expect(Array.isArray(response.json())).toBe(true);
+      const body = response.json();
+      expect(body).toHaveProperty("id");
+      expect(body.email).toBe("me@example.com");
+      expect(body.role).toBe("USER");
+      expect(body).not.toHaveProperty("password");
     });
 
-    it("should return 401 when accessing protected route without token", async () => {
+    it("should return 401 without token", async () => {
       const response = await server.inject({
         method: "GET",
-        url: "/api/posts",
+        url: "/api/auth/me",
       });
 
       expect(response.statusCode).toBe(401);
@@ -240,10 +224,8 @@ describe("Authentication Integration Tests", () => {
     it("should return 401 with invalid token", async () => {
       const response = await server.inject({
         method: "GET",
-        url: "/api/posts",
-        headers: {
-          authorization: "Bearer invalid-token",
-        },
+        url: "/api/auth/me",
+        headers: { authorization: "Bearer invalid-token" },
       });
 
       expect(response.statusCode).toBe(401);
@@ -252,31 +234,11 @@ describe("Authentication Integration Tests", () => {
     it("should return 401 with malformed authorization header", async () => {
       const response = await server.inject({
         method: "GET",
-        url: "/api/posts",
-        headers: {
-          authorization: "InvalidFormat token",
-        },
+        url: "/api/auth/me",
+        headers: { authorization: "InvalidFormat token" },
       });
 
       expect(response.statusCode).toBe(401);
-    });
-
-    it("should allow creating a post with valid token", async () => {
-      const response = await server.inject({
-        method: "POST",
-        url: "/api/posts",
-        headers: {
-          authorization: `Bearer ${authToken}`,
-        },
-        payload: {
-          text: "Test post",
-        },
-      });
-
-      expect(response.statusCode).toBe(201);
-      expect(response.json()).toHaveProperty("id");
-      expect(response.json().text).toBe("Test post");
-      expect(response.json().userId).toBe(userId);
     });
   });
 });

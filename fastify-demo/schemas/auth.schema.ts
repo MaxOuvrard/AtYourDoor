@@ -16,24 +16,26 @@ export const RegisterSchema = Type.Object(
   { additionalProperties: false }
 );
 
-export const UserResponseSchema = Type.Object({
-  id: Type.String(),
-  email: Type.String(),
-  role: Type.String(),
-});
-
 export const TokenResponseSchema = Type.Object({
   token: Type.String(),
 });
 
-export const ErrorResponseSchema = Type.Object({
-  error: Type.Object({
-    statusCode: Type.Number(),
-    message: Type.String(),
-  }),
+export const ProfileResponseSchema = Type.Object({
+  id: Type.String(),
+  email: Type.String(),
+  firstName: Type.Union([Type.String(), Type.Null()]),
+  lastName: Type.Union([Type.String(), Type.Null()]),
+  phone: Type.Union([Type.String(), Type.Null()]),
+  role: Type.Union([
+    Type.Literal("USER"),
+    Type.Literal("ADMIN"),
+    Type.Literal("RESTAURANT"),
+  ]),
+  createdAt: Type.String({ format: "date-time" }),
+  updatedAt: Type.String({ format: "date-time" }),
 });
 
 export type LoginRequest = Static<typeof LoginSchema>;
 export type RegisterRequest = Static<typeof RegisterSchema>;
-export type UserResponse = Static<typeof UserResponseSchema>;
 export type TokenResponse = Static<typeof TokenResponseSchema>;
+export type ProfileResponse = Static<typeof ProfileResponseSchema>;

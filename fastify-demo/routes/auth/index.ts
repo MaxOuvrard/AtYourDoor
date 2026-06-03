@@ -1,10 +1,10 @@
-import { Type } from "@sinclair/typebox";
 import { FastifyInstance } from "fastify/types/instance";
 import { login, register } from "../../services/auth.service.js";
 import {
   LoginSchema,
   RegisterSchema,
   TokenResponseSchema,
+  ProfileResponseSchema,
   type LoginRequest,
   type RegisterRequest,
 } from "../../schemas/auth.schema.js";
@@ -44,6 +44,22 @@ export const authRoutes = async (app: FastifyInstance) => {
       const user = await login(app.prisma, request.body);
       const token = app.jwt.sign({ id: user.id });
       return reply.status(200).send({ token });
+    },
+  );
+
+  app.get(
+    "/me",
+    {
+      preHandler: app.authenticate,
+      schema: {
+        response: {
+          200: ProfileResponseSchema,
+          401: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      return reply.send(request.user);
     },
   );
 };

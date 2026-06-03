@@ -4,7 +4,6 @@ import { onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const userStore = useUserStore()
-userStore.initUserFromStorage()
 
 const config = useRuntimeConfig();
 console.log(config.public.apiUrl);
@@ -48,6 +47,7 @@ function updateForRoute() {
 }
 
 onMounted(() => {
+  userStore.initUserFromStorage()
   nextTick(updateForRoute)
   window.addEventListener('resize', updateForRoute)
 })

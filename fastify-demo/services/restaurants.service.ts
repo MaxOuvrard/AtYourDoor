@@ -7,9 +7,9 @@ import type {
   RestaurantListQuery,
 } from "../schemas/restaurants.schema.js";
 
-const OWNER_SELECT = {
+const ownerSelect = {
   select: { id: true, email: true, firstName: true, lastName: true },
-} as const;
+};
 
 export class RestaurantService {
   constructor(private prisma: PrismaClient) {}
@@ -17,16 +17,13 @@ export class RestaurantService {
   async getAllRestaurants(params: RestaurantListQuery = {}) {
     const limit = params.limit ?? 20;
     const offset = params.offset ?? 0;
-    const where = params.name
-      ? { name: { contains: params.name } }
-      : {};
+    const where = params.name ? { name: { contains: params.name } } : {};
 
     const [data, total] = await Promise.all([
       this.prisma.restaurant.findMany({
         where,
         skip: offset,
         take: limit,
-        include: { owner: OWNER_SELECT.select as any },
         orderBy: { createdAt: "desc" },
       }),
       this.prisma.restaurant.count({ where }),
@@ -39,7 +36,7 @@ export class RestaurantService {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id },
       include: {
-        owner: OWNER_SELECT.select as any,
+        owner: ownerSelect,
         plats: {
           where: { available: true },
           orderBy: { createdAt: "desc" },
@@ -54,7 +51,7 @@ export class RestaurantService {
   async getMyRestaurant(ownerId: string) {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { ownerId },
-      include: { owner: OWNER_SELECT.select as any },
+      include: { owner: ownerSelect },
     });
 
     if (!restaurant) throw new NotFoundError("Aucun restaurant associé à ce compte");
@@ -85,7 +82,7 @@ export class RestaurantService {
           },
         },
       },
-      include: { owner: OWNER_SELECT.select as any },
+      include: { owner: ownerSelect },
     });
   }
 
@@ -96,7 +93,7 @@ export class RestaurantService {
     return this.prisma.restaurant.update({
       where: { ownerId },
       data,
-      include: { owner: OWNER_SELECT.select as any },
+      include: { owner: ownerSelect },
     });
   }
 

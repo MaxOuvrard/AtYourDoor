@@ -1,36 +1,30 @@
 <script setup lang="ts">
-import { computed, watch } from "vue";
-import { defineAsyncComponent } from 'vue'
-import AppImage from '~/components/AppImage.vue'
-import type { Restaurant } from "~/modules/restaurant/types";
-import type { Plat } from "~/modules/plat/types";
-import useResource from '../../../composables/useResource'
-import "~/assets/css/style.css";
-
+import { computed, watch } from 'vue';
+import AppImage from '~/components/AppImage.vue';
 import { useSeoMeta } from 'nuxt/app';
+import { mapRestaurant, mapPaginatedPlats } from '../../../utils/mappers';
+import { apiFetch } from '../../../utils/api';
 
 const router = useRouter();
-
 const route = useRoute();
-const restaurantId = Number(route.params.restaurant_id);
+const restaurantId = String(route.params.restaurant_id);
 
-
-const { data: restaurant, pending: pendingRestaurant, error: errorRestaurant, refresh: refreshRestaurant } = await useResource<Restaurant | null>(
+const { data: rawRestaurant, error: errorRestaurant, refresh: refreshRestaurant } = await useAsyncData(
   `restaurant-${restaurantId}`,
-  () => $fetch(`/api/restaurants/${restaurantId}`),
-  null
+  () => apiFetch(`/api/restaurants/${restaurantId}`),
+  { default: () => null }
 );
 
-// SEO dynamique selon les données du restaurant
+const restaurant = computed(() => mapRestaurant(rawRestaurant.value))
+
 watch(
   () => restaurant.value,
   (resto) => {
     if (resto) {
       useSeoMeta({
-        title: `${resto.name} - Restaurant sur AtYourDoor`,
-        description: `Découvrez ${resto.name} à ${resto.city} et commandez ses meilleurs plats sur AtYourDoor.`,
-        ogTitle: `${resto.name} - Restaurant sur AtYourDoor`,
-        ogDescription: `Découvrez ${resto.name} à ${resto.city} et commandez ses meilleurs plats sur AtYourDoor.`,
+        title: `${resto.name} - AtYourDoor`,
+        description: `Découvrez ${resto.name} à ${resto.city} et commandez ses meilleurs plats.`,
+        ogTitle: `${resto.name} - AtYourDoor`,
         ogImage: resto.image || '/images/home/home_jap.jpg',
         twitterCard: 'summary_large_image'
       });
@@ -39,102 +33,73 @@ watch(
   { immediate: true }
 );
 
-const { data: plats, pending: pendingPlats, error: errorPlats, refresh: refreshPlats } = await useResource<Plat[]>(
-  `plats`,
-  () => $fetch("/api/plats"),
-  []
+const { data: rawPlats, error: errorPlats, refresh: refreshPlats } = await useAsyncData(
+  `dishes-restaurant-${restaurantId}`,
+  () => apiFetch(`/api/restaurants/${restaurantId}/dishes?limit=100`),
+  { default: () => null }
 );
 
-const platsForRestaurant = computed(() => {
-  return (plats.value || []).filter((p) => p.id_restaurant === restaurantId);
-});
+const plats = computed(() => mapPaginatedPlats(rawPlats.value))
 </script>
 
 <template>
   <Header />
-  <div v-if="errorRestaurant || errorPlats" class="fetch-error" style="padding:12px; text-align:center; color:var(--error);">
-    <div v-if="errorRestaurant">Erreur lors du chargement du restaurant : {{ errorRestaurant.message || errorRestaurant }}</div>
-    <div v-if="errorPlats">Erreur lors du chargement des plats : {{ errorPlats.message || errorPlats }}</div>
-    <div style="margin-top:8px;">
-      <button @click="refreshRestaurant?.()">Réessayer restaurant</button>
-      <button @click="refreshPlats?.()" style="margin-left:8px;">Réessayer plats</button>
-    </div>
-  </div>
-  <div class="back-btn-wrapper">
-    <button class="btn-primary" @click="router.push('/restaurants')">
-      <span class="arrow-left">&#8592;</span>
-      <span class="btn-text">Retour</span>
-    </button>
-  </div>
-  <section v-if="restaurant" class="restaurant-page">
-        <div class="restaurant-card">
-        <div class="restaurant-image-wrapper">
-          <AppImage :src="restaurant.image" :alt="restaurant.name" />
+  <div class="page">
+
+    <!-- Error states -->
+    <div v-if="errorRestaurant || errorPlats" class="container" style="padding-top: 20px;">
+      <div class="error-banner">
+        <span>{{ errorRestaurant ? `Erreur restaurant : ${(errorRestaurant as any)?.message}` : `Erreur plats : ${(errorPlats as any)?.message}` }}</span>
+        <div style="display:flex;gap:8px;">
+          <button v-if="errorRestaurant" class="btn btn-sm btn-light" @click="() => refreshRestaurant()">Retry</button>
+          <button v-if="errorPlats" class="btn btn-sm btn-light" @click="() => refreshPlats()">Retry plats</button>
         </div>
-      <div class="restaurant-info">
-        <h1 class="restaurant-title">{{ restaurant.name }}</h1>
-        <p class="restaurant-city">{{ restaurant.city }}</p>
       </div>
     </div>
 
-    <div class="plats-section">
-      <h2 class="plats-title">Plats proposés</h2>
-      <ul class="plats-list">
-        <li v-for="plat in platsForRestaurant" :key="plat.id" class="plat-item-wrapper">
-          <PlatItem :plat="plat" />
-          <p class="plat-description">{{ plat.description }}</p>
-        </li>
-        <li v-if="platsForRestaurant.length === 0" class="no-plats">Aucun plat trouvé pour ce restaurant.</li>
-      </ul>
+    <template v-if="restaurant">
+      <!-- Hero -->
+      <div class="resto-hero">
+        <AppImage :src="restaurant.image" :alt="restaurant.name" style="width:100%;height:100%;object-fit:cover;" />
+        <div class="resto-hero-overlay">
+          <button class="btn btn-ghost btn-sm" style="align-self:flex-start;" @click="router.push('/restaurants')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Retour
+          </button>
+          <div class="resto-hero-info">
+            <h1>{{ restaurant.name }}</h1>
+            <p>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ restaurant.city }}
+            </p>
+            <p v-if="(restaurant as any).description" style="margin-top:6px;font-size:0.88rem;opacity:0.75;">
+              {{ (restaurant as any).description }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dishes section -->
+      <div class="container" style="padding-top: 36px; padding-bottom: 56px;">
+        <h2 class="section-title">Plats disponibles</h2>
+
+        <div v-if="plats.length > 0" class="card-grid">
+          <PlatItem v-for="plat in plats" :key="plat.id" :plat="plat" />
+        </div>
+
+        <div v-else class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2h1l1 9H4L3 2z"/><path d="M7 2h1l.5 9H7L7 2z"/><circle cx="9" cy="18" r="2"/><circle cx="16" cy="18" r="2"/><path d="M4 11h14l-1.5 7H5.5L4 11z"/></svg>
+          <h3>Aucun plat disponible</h3>
+          <p>Ce restaurant n'a pas encore ajouté de plats.</p>
+        </div>
+      </div>
+    </template>
+
+    <!-- Loading -->
+    <div v-else class="container" style="padding: 80px 0; text-align: center; color: var(--text-muted);">
+      <div class="spinner" style="width:32px;height:32px;border-color:rgba(69,90,100,0.15);border-top-color:var(--accent);margin:0 auto 16px;"></div>
+      <p>Chargement du restaurant…</p>
     </div>
-  </section>
 
-  <section v-else>
-    <p>Chargement...</p>
-  </section>
+  </div>
 </template>
-
-  <style scoped>
-  .plat-item-wrapper {
-          margin-bottom: 1.2rem;
-        }
-        .plat-description {
-          margin: 0.3rem 0 0.7rem 2.2rem;
-          color: #444;
-          font-size: 1.01rem;
-          font-style: italic;
-        }
-        
-  .back-btn-wrapper {
-    margin: 1.5rem 0 1rem 0;
-    padding-left: 1rem;
-  }
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6em;
-    background: linear-gradient(90deg, var(--accent), var(--accent-600));
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 0.5rem 1.4rem 0.5rem 1.4rem;
-    font-size: 1.08rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(229,57,53,0.10);
-    transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
-    outline: none;
-  }
-  .arrow-left {
-    font-size: 1.1em;
-    pointer-events: none;
-    margin-right: 0.1em;
-  }
-  .btn-text {
-    display: inline-block;
-  }
-  .btn-primary:hover {
-    background: linear-gradient(90deg, var(--accent-600), var(--accent));
-    transform: translateY(-2px);
-  }
-  </style>

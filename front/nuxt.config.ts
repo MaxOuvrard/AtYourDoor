@@ -3,6 +3,30 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@vite-pwa/nuxt'],
+
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001',
+    }
+  },
+
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: process.env.API_URL || 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/docs': {
+        target: process.env.API_URL || 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/graphql': {
+        target: process.env.API_URL || 'http://localhost:3001',
+        changeOrigin: true,
+      }
+    }
+  },
+
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
@@ -32,26 +56,19 @@ export default defineNuxtConfig({
       swSrc: 'public/service-worker.js',
     }
   },
+
   i18n: {
     locales: [
-      {
-        code: 'fr',
-        name: 'Français',
-        file: 'fr.json',
-      },
-      {
-        code: 'en',
-        name: 'English',
-        file: 'en.json',
-      }
+      { code: 'fr', name: 'French', file: 'fr.json' },
+      { code: 'en', name: 'English', file: 'en.json' }
     ],
     defaultLocale: 'fr',
+    strategy: 'no_prefix',
     langDir: 'locales/',
-    vueI18n: 'locales/i18n.config.mjs',
+    vueI18n: 'i18n/locales/i18n.config.mjs',
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: 'i18n_redirected',
-      alwaysRedirect: true,
       fallbackLocale: 'fr'
     }
   }

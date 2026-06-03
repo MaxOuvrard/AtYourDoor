@@ -41,10 +41,10 @@ import { useUserStore } from '../../../stores/userStore';
 import { useSeoMeta } from 'nuxt/app';
 
 useSeoMeta({
-	title: "Inscription - AtYourDoor",
-	description: "Créez un compte sur AtYourDoor pour commander vos plats préférés et profiter de la livraison à domicile.",
-	ogTitle: "Inscription - AtYourDoor",
-	ogDescription: "Rejoignez AtYourDoor et accédez à la meilleure plateforme de livraison de repas.",
+	title: "Sign up - AtYourDoor",
+	description: "Create an AtYourDoor account to order your favorite dishes and enjoy home delivery.",
+	ogTitle: "Sign up - AtYourDoor",
+	ogDescription: "Join AtYourDoor and access the best meal delivery platform.",
 	ogImage: "/images/home/home_jap.jpg",
 	twitterCard: "summary_large_image"
 });
@@ -63,7 +63,7 @@ const error = ref('');
 const register = async () => {
   error.value = '';
   if (form.value.password !== form.value.confirmPassword) {
-    error.value = 'Les mots de passe ne correspondent pas.';
+		error.value = 'Passwords do not match.';
     return;
   }
   try {
@@ -79,7 +79,7 @@ const register = async () => {
     }
     router.push('/login');
   } catch (e) {
-    error.value = "Erreur lors de l'inscription.";
+		error.value = 'Error while signing up.'
   }
 };
 </script>

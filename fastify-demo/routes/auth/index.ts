@@ -3,7 +3,7 @@ import { login, register } from "../../services/auth.service.js";
 import {
   LoginSchema,
   RegisterSchema,
-  TokenResponseSchema,
+  AuthResponseSchema,
   ProfileResponseSchema,
   type LoginRequest,
   type RegisterRequest,
@@ -15,9 +15,11 @@ export const authRoutes = async (app: FastifyInstance) => {
     "/register",
     {
       schema: {
+        tags: ["auth"],
+        summary: "Inscription",
         body: RegisterSchema,
         response: {
-          201: TokenResponseSchema,
+          201: AuthResponseSchema,
           409: ErrorResponseSchema,
         },
       },
@@ -25,7 +27,10 @@ export const authRoutes = async (app: FastifyInstance) => {
     async (request, reply) => {
       const user = await register(app.prisma, request.body);
       const token = app.jwt.sign({ id: user.id });
-      return reply.status(201).send({ token });
+      return reply.status(201).send({
+        token,
+        user: { id: user.id, email: user.email, firstName: null, role: user.role },
+      });
     },
   );
 
@@ -33,17 +38,27 @@ export const authRoutes = async (app: FastifyInstance) => {
     "/login",
     {
       schema: {
+        tags: ["auth"],
+        summary: "Connexion",
         body: LoginSchema,
         response: {
-          200: TokenResponseSchema,
+          200: AuthResponseSchema,
           401: ErrorResponseSchema,
         },
       },
     },
     async (request, reply) => {
       const user = await login(app.prisma, request.body);
+      // Récupère le profil complet pour avoir firstName
+      const fullUser = await app.prisma.user.findUnique({
+        where: { id: user.id },
+        select: { id: true, email: true, firstName: true, role: true },
+      });
       const token = app.jwt.sign({ id: user.id });
-      return reply.status(200).send({ token });
+      return reply.status(200).send({
+        token,
+        user: fullUser ?? { id: user.id, email: user.email, firstName: null, role: user.role },
+      });
     },
   );
 
@@ -52,6 +67,8 @@ export const authRoutes = async (app: FastifyInstance) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ["auth"],
+        summary: "Profil connecté",
         response: {
           200: ProfileResponseSchema,
           401: ErrorResponseSchema,

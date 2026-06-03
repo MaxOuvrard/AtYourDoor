@@ -7,6 +7,9 @@ import { defineAsyncComponent } from 'vue'
 const PlatItem = defineAsyncComponent(() => import('~/components/PlatItem.vue'))
 import { useRouter } from 'vue-router';
 import type { Plat } from '~/modules/plat/types';
+import { apiFetch } from '../../../utils/api'
+import { mapPaginatedPlats, mapRestaurant } from '../../../utils/mappers'
+import { useAsyncData } from '#app'
 
 const userStore = useUserStore();
 const mesPlats = ref<Plat[]>([]);
@@ -14,6 +17,13 @@ const loading = ref(false);
 const error = ref('');
 const success = ref('');
 const router = useRouter();
+const currentRestaurant = ref<any | null>(null)
+
+const { data: myRestaurantData } = await useAsyncData('my-restaurant-plats', async () => {
+	const data = await apiFetch('/api/restaurants/me')
+	currentRestaurant.value = mapRestaurant(data)
+	return data
+})
 
 async function fetchMesPlats() {
 	const token = userStore.token;
@@ -21,21 +31,21 @@ async function fetchMesPlats() {
 		error.value = $t('mesplats.not_authenticated');
 		return;
 	}
+	const restaurantId = currentRestaurant.value?.id || userStore.restaurantId;
+	if (!restaurantId) {
+		error.value = 'No restaurant is associated with this account.';
+		mesPlats.value = [];
+		return;
+	}
 	loading.value = true;
 	try {
-		const res = await fetch('/api/plats/mesplats', {
+		const response = await apiFetch<{ data?: unknown[] }>(`/api/restaurants/${restaurantId}/dishes`, {
 			headers: {
-			Authorization: `Bearer ${token}`,
-		},
+				Authorization: `Bearer ${token}`,
+			},
 		});
-		if (!res.ok) {
-			const err = await res.json();
-			error.value = err.error || $t('mesplats.load_error');
-			mesPlats.value = [];
-		} else {
-			mesPlats.value = await res.json();
-			error.value = '';
-		}
+		mesPlats.value = mapPaginatedPlats(response) ?? [];
+		error.value = '';
 	} catch (e) {
 		error.value = $t('mesplats.network_error');
 		mesPlats.value = [];
@@ -57,27 +67,24 @@ async function supprimerPlat(id: number) {
 		return;
 	}
 	try {
-		const res = await fetch(`/api/plats/${id}`, {
+		await apiFetch(`/api/dishes/${id}`, {
 			method: 'DELETE',
-			headers: { Authorization: `Bearer ${token}` }
+			headers: { Authorization: `Bearer ${token}` },
 		});
-		const data = await res.json();
-		if (!res.ok) {
-			error.value = data.error || $t('delete_error') || 'Erreur lors de la suppression.';
-		} else {
-			success.value = 'Plat supprimé.';
-			// retirer localement
-			mesPlats.value = mesPlats.value.filter(p => p.id !== id);
-			// clear message after a short delay
-			setTimeout(() => { success.value = ''; }, 3500);
-			pendingDeleteId.value = null;
-		}
+		success.value = 'Dish deleted.';
+		mesPlats.value = mesPlats.value.filter(p => p.id !== id);
+		setTimeout(() => { success.value = ''; }, 3500);
+		pendingDeleteId.value = null;
 	} catch (e) {
 		error.value = $t('mesplats.network_error');
 	}
 }
 
 onMounted(fetchMesPlats);
+
+watch(myRestaurantData, () => {
+	fetchMesPlats()
+})
 </script>
 
 <template>
@@ -100,8 +107,8 @@ onMounted(fetchMesPlats);
 									<div v-if="success" class="no-plats" style="color: var(--success, #1a7f37);">{{ success }}</div>
 									<div v-if="pendingDeleteId !== null" class="delete-confirm" style="text-align:center;padding:8px 0;">
 										<span>{{ $t('mesplats.confirm_delete') || 'Confirmer la suppression ?' }}</span>
-										<button @click="supprimerPlat(pendingDeleteId)" style="margin-left:10px;padding:6px 10px;border-radius:8px;background:var(--accent);color:#fff;border:none;">{{ $t('delete') || 'Supprimer' }}</button>
-										<button @click="pendingDeleteId = null" style="margin-left:6px;padding:6px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;">{{ $t('cancel') || 'Annuler' }}</button>
+										<button @click="supprimerPlat(pendingDeleteId)" style="margin-left:10px;padding:6px 10px;border-radius:8px;background:var(--accent);color:#fff;border:none;">{{ $t('delete') || 'Delete' }}</button>
+										<button @click="pendingDeleteId = null" style="margin-left:6px;padding:6px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;">{{ $t('cancel') || 'Cancel' }}</button>
 									</div>
 								</div>
 								<ul v-if="!loading && !error && mesPlats.length" class="plats-list">

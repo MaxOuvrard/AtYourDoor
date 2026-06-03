@@ -4,159 +4,108 @@ import type { Plat } from "~/modules/plat/types";
 import { useGlobalStore } from '../../stores/globalStore'
 import { useUserStore } from '../../stores/userStore'
 import { storeToRefs } from 'pinia'
-import { computed as vueComputed } from 'vue'
 
 const props = defineProps<{
   plat: Plat;
   to?: string;
   showActions?: boolean;
-}>();
+}>()
 
-const emit = defineEmits<{
-  (e: 'delete', id: number): void
-}>();
-
-const cardStyle = computed(() => ({
-  backgroundImage: props.plat.image ? `url(${props.plat.image})` : 'none',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-}));
+const emit = defineEmits<{ (e: 'delete', id: number): void }>()
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
-const isUser = vueComputed(() => user.value?.role === 'USER')
-function addToCart() {
+const isUser = computed(() => user.value?.role === 'USER')
+
+function addToCart(e: Event) {
+  e.preventDefault()
+  e.stopPropagation()
   globalStore.ajouterAuPanier(props.plat as any)
 }
 </script>
 
 <template>
-  <li class="plat-item">
-    <div class="plat-wrapper">
-      <NuxtLink :to="props.to ? props.to : `/plats/${props.plat.id}`" class="plat-link" :aria-label="props.plat.name">
-      <div class="plat-card" :style="cardStyle">
-        <div class="card-overlay">
-          <div class="card-text">
-            <h2 class="plat-name">{{ props.plat.name }}</h2>
-            <p class="plat-price">{{ props.plat.price }} €</p>
-          </div>
-          <button v-if="isUser" class="add-cart-btn" @click.prevent="addToCart" aria-label="Ajouter au panier">+</button>
-        </div>
+  <div class="plat-wrap">
+    <NuxtLink :to="props.to ?? `/plats/${props.plat.id}`" class="plat-card">
+      <div class="plat-card__img" :style="props.plat.image ? { backgroundImage: `url(${props.plat.image})` } : {}">
+        <span class="plat-card__price">{{ Number(props.plat.price).toFixed(2) }} €</span>
+        <button v-if="isUser" class="plat-card__add" @click="addToCart" aria-label="Ajouter au panier">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
       </div>
-      </NuxtLink>
-      <button v-if="props.showActions" class="delete-btn" @click.prevent="emit('delete', props.plat.id)" aria-label="Supprimer">×</button>
-    </div>
-  </li>
+      <div class="plat-card__body">
+        <span class="plat-card__name">{{ props.plat.name }}</span>
+        <p v-if="props.plat.description" class="plat-card__desc">{{ props.plat.description }}</p>
+      </div>
+    </NuxtLink>
+    <button v-if="props.showActions" class="plat-card__del" @click.prevent="emit('delete', props.plat.id)" aria-label="Supprimer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </button>
+  </div>
 </template>
 
 <style scoped>
-.plat-item {
-  list-style: none;
-  display: inline-block;
-  vertical-align: top;
-  width: clamp(220px, 26%, 320px);
-  margin: 10px;
-}
-
-.plat-link {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
+.plat-wrap { position: relative; }
 
 .plat-card {
-  width: 100%;
-  aspect-ratio: 4/3;
-  max-width: 100%;
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
-  background-color: #f3f4f6;
-  transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms;
-  box-shadow: 0 4px 12px rgba(15,23,42,0.06);
-  display: block;
+  display: flex; flex-direction: column;
+  background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  transition: transform 200ms cubic-bezier(.2,.9,.2,1), box-shadow 200ms;
+  text-decoration: none; color: inherit;
 }
-
-.plat-wrapper { position: relative; }
-.delete-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255,255,255,0.92);
-  color: var(--error);
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 6px 14px rgba(12,14,20,0.08);
-}
-.delete-btn:hover { transform: translateY(-2px); }
-
 .plat-card:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 8px 22px rgba(15,23,42,0.10);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.13);
 }
 
-.card-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.52) 100%);
+.plat-card__img {
+  aspect-ratio: 4/3; width: 100%; position: relative;
+  background: #E8E4DD center/cover no-repeat;
 }
 
-.card-text {
-  width: 100%;
-  padding: 10px 12px;
-  color: #fff;
-  backdrop-filter: blur(2px);
+.plat-card__price {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.97); color: #E53935;
+  font-size: 0.82rem; font-weight: 700; padding: 4px 11px;
+  border-radius: 9999px; box-shadow: 0 1px 8px rgba(0,0,0,0.12);
 }
 
-.add-cart-btn {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: none;
-  background: rgba(255,255,255,0.92);
-  color: var(--accent, #E53935);
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 6px 14px rgba(12,14,20,0.08);
+.plat-card__add {
+  position: absolute; bottom: 10px; right: 10px;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: #E53935; color: #fff; border: none;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(229,57,53,0.32);
+  transition: transform 120ms, box-shadow 120ms;
 }
-.add-cart-btn:hover { transform: translateY(-2px); }
-
-.plat-name {
-  margin: 0 0 4px 0;
-  font-size: 0.98rem;
-  font-weight: 600;
-  line-height: 1.1;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+.plat-card__add:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 20px rgba(229,57,53,0.42);
 }
 
-.plat-price {
-  margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.97;
+.plat-card__body { padding: 12px 14px 16px; }
+
+.plat-card__name {
+  display: block; font-size: 0.92rem; font-weight: 700;
+  color: #263238; margin-bottom: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-@media (max-width: 640px) {
-  .plat-item {
-    width: clamp(180px, 48vw, 98vw);
-    margin: 8px;
-  }
-  .plat-card {
-    aspect-ratio: 4/3;
-    border-radius: 8px;
-    max-width: 100%;
-  }
-  .plat-name { font-size: 0.96rem; }
-  .card-text { padding: 8px 10px; }
+.plat-card__desc {
+  font-size: 0.78rem; color: #78909C; line-height: 1.4;
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
+
+.plat-card__del {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  width: 32px; height: 32px; border-radius: 9px; border: none;
+  background: rgba(255,255,255,0.95); color: #C62828;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: background var(--t-fast);
+}
+.plat-card__del:hover { background: #FFEBEE; }
 </style>

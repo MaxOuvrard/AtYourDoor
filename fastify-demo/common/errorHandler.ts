@@ -33,12 +33,12 @@ export function buildErrorHandler() {
       });
     }
 
-    // Fallback → 500
+    // Fallback → 500 (inclut le message d'erreur pour faciliter le debug)
     reply.status(500).send({
       type: "urn:app:error:internal",
       title: "Internal Server Error",
       status: 500,
-      detail: "An unexpected error occurred",
+      detail: error.message || "An unexpected error occurred",
       instance: request.url,
     });
   };

@@ -3,7 +3,7 @@ import { Type, Static } from "@sinclair/typebox";
 export const LoginSchema = Type.Object(
   {
     email: Type.String({ format: "email" }),
-    password: Type.String({ minLength: 6 }),
+    password: Type.String({ minLength: 1 }),
   },
   { additionalProperties: false }
 );
@@ -18,6 +18,18 @@ export const RegisterSchema = Type.Object(
 
 export const TokenResponseSchema = Type.Object({
   token: Type.String(),
+});
+
+const UserInTokenSchema = Type.Object({
+  id: Type.String(),
+  email: Type.String(),
+  firstName: Type.Union([Type.String(), Type.Null()]),
+  role: Type.Union([Type.Literal("USER"), Type.Literal("ADMIN"), Type.Literal("RESTAURANT")]),
+});
+
+export const AuthResponseSchema = Type.Object({
+  token: Type.String(),
+  user: UserInTokenSchema,
 });
 
 export const ProfileResponseSchema = Type.Object({

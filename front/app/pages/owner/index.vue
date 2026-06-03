@@ -53,21 +53,30 @@ import { useRestaurantStore } from '../../../stores/restaurantStore'
 import { useUserStore } from '../../../stores/userStore'
 import { computed, watch, onMounted, ref } from 'vue'
 import AppImage from '~/components/AppImage.vue'
+import { apiFetch } from '../../../utils/api'
+import { mapPaginatedRestaurants, mapRestaurant } from '../../../utils/mappers'
 
 const name = ref('')
 const city = ref('')
 const category = ref('')
 const image = ref<File|null>(null)
 const imagePreview = ref('')
+const currentRestaurant = ref<any | null>(null)
 
 const userStore = useUserStore()
 const restaurantStore = useRestaurantStore()
 // commande logic removed from this page; commandes live in /commandes
 
 const { data: restaurantsData } = useAsyncData('restaurants', async () => {
-  const data = await $fetch('/api/restaurants')
-  restaurantStore.setRestaurants(data)
+	const data = await apiFetch('/api/restaurants')
+	restaurantStore.setRestaurants(mapPaginatedRestaurants(data))
   return data
+})
+
+const { data: myRestaurantData } = useAsyncData('my-restaurant', async () => {
+	const data = await apiFetch('/api/restaurants/me')
+	currentRestaurant.value = mapRestaurant(data)
+	return data
 })
 
 const categories = computed(() => {
@@ -76,8 +85,8 @@ const categories = computed(() => {
 })
 
 function fillRestaurantFields() {
-	if (!userStore.user || userStore.user.role !== 'OWNER' || !restaurantStore.restaurants.length) return
-	const resto = restaurantStore.restaurants.find((r) => r.name === userStore.user.name)
+	if (!userStore.user || userStore.user.role !== 'OWNER') return
+	const resto = currentRestaurant.value || restaurantStore.restaurants.find((r) => (r as any).ownerId === userStore.user.id)
 	if (resto) {
 		name.value = resto.name
 		city.value = resto.city
@@ -101,25 +110,23 @@ onMounted(() => {
 
 async function updateRestaurant() {
 	if (!userStore.user) {
-		restaurantStore.error = 'Utilisateur non connecté'
+		restaurantStore.error = 'User not logged in'
 		return
 	}
 
-	const currentResto = restaurantStore.restaurants.find(r => r.name === userStore.user.name)
+	const currentResto = currentRestaurant.value || restaurantStore.restaurants.find(r => (r as any).ownerId === userStore.user.id)
 	if (!currentResto) {
-		restaurantStore.error = 'Aucun restaurant trouvé pour cet utilisateur'
+		restaurantStore.error = 'No restaurant found for this user'
 		return
 	}
-
-	const form = new FormData()
-	form.append('restaurant_id', String(currentResto.id))
-	form.append('name', name.value)
-	form.append('city', city.value)
-	form.append('category', category.value)
-	if (image.value) form.append('image', image.value)
 
 	try {
-		const res: any = await restaurantStore.saveRestaurant(form)
+		const res: any = await restaurantStore.saveRestaurant({
+			name: name.value,
+			address: city.value,
+			description: category.value ? `Category: ${category.value}` : (currentResto as any).description,
+			imageUrl: image.value ? undefined : imagePreview.value || (currentResto as any).image,
+		})
 		name.value = res.name || name.value
 		city.value = res.city || city.value
 		category.value = res.category || category.value
@@ -140,6 +147,10 @@ watch(
 	},
 	{ immediate: true, deep: true }
 )
+
+watch(myRestaurantData, () => {
+	fillRestaurantFields()
+})
 
 </script>
 

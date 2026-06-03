@@ -12,8 +12,8 @@ import type {
 import { notifyRestaurant } from "./websocket.service.js";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  PENDING: ["CONFIRMED"],
-  CONFIRMED: ["PREPARING"],
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["PREPARING", "CANCELLED"],
   PREPARING: ["READY"],
   READY: ["ON_DELIVERY"],
   ON_DELIVERY: ["DELIVERED"],

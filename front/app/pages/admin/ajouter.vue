@@ -5,6 +5,7 @@ definePageMeta({ middleware: ('auth' as unknown) as any })
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRestaurantStore } from '../../../stores/restaurantStore';
+import { apiFetch } from '../../../utils/api'
 
 
 const router = useRouter();
@@ -12,11 +13,11 @@ const restaurantStore = useRestaurantStore();
 
 // Liste des catégories extraites des restaurants.json
 const categories = [
-  'français',
+  'french',
   'pizza',
   'tapas',
   'sandwich',
-  'asiatique',
+  'asian',
   'burger'
 ];
 
@@ -44,28 +45,21 @@ function handleFileChange(event: Event) {
 async function submitForm() {
   error.value = '';
   success.value = '';
-  const formData = new FormData();
-  formData.append('name', form.value.name ?? '');
-  formData.append('category', form.value.category ?? '');
-  formData.append('city', form.value.city ?? '');
-  formData.append('email', form.value.email ?? '');
-  formData.append('password', form.value.password ?? '');
-  if (form.value.image) {
-    formData.append('image', form.value.image);
-  }
   try {
-    const response = await fetch('/api/restaurants/add', {
+    const response = await apiFetch('/api/restaurants', {
       method: 'POST',
-      body: formData
+      body: {
+        name: form.value.name ?? '',
+        address: form.value.city ?? '',
+        email: form.value.email ?? '',
+        password: form.value.password ?? '',
+        description: form.value.category ? `Catégorie: ${form.value.category}` : undefined,
+        description: form.value.category ? `Category: ${form.value.category}` : undefined,
+      }
     });
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      error.value = err.error || "Erreur lors de l'ajout du restaurant";
-      return;
-    }
-    const newRestaurant = await response.json();
+    const newRestaurant = response as any;
     restaurantStore.addRestaurant(newRestaurant);
-    success.value = 'Restaurant ajouté !';
+    success.value = 'Restaurant added!';
     // Reset du formulaire
     form.value = {
       name: '',
@@ -79,7 +73,7 @@ async function submitForm() {
     const fileInput = document.getElementById('image') as HTMLInputElement | null;
     if (fileInput) fileInput.value = '';
   } catch (e) {
-    error.value = "Erreur lors de l'ajout du restaurant";
+    error.value = 'Error while adding the restaurant';
   }
 }
 </script>
@@ -89,27 +83,27 @@ async function submitForm() {
   <div class="back-btn-wrapper">
     <button class="btn-primary" @click="router.push('/admin')">
       <span class="arrow-left">&#8592;</span>
-      <span class="btn-text">Retour</span>
+      <span class="btn-text">Back</span>
     </button>
     </div>
   <div class="profile-container">
     <form class="profile-form" @submit.prevent="submitForm">
-      <h1>Ajouter un restaurant</h1>
+      <h1>Add a restaurant</h1>
       <div v-if="error" style="color: #b71c1c; font-weight: 600; margin-bottom: 10px;">{{ error }}</div>
       <div v-if="success" style="color: #388e3c; font-weight: 600; margin-bottom: 10px;">{{ success }}</div>
       <div class="form-group">
-        <label for="name">Nom</label>
-        <input id="name" v-model="form.name" type="text" required placeholder="Nom du restaurant" class="input-style" />
+        <label for="name">Name</label>
+        <input id="name" v-model="form.name" type="text" required placeholder="Restaurant name" class="input-style" />
       </div>
 
       <div class="form-group">
-        <label for="category">Catégorie</label>
+        <label for="category">Category</label>
         <select id="category" v-model="form.category" required class="input-style">
           <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
       </div>
       <div class="form-group">
-        <label for="city">Ville</label>
+        <label for="city">City</label>
         <input id="city" v-model="form.city" type="text" required placeholder="Paris" class="input-style" />
       </div>
       <div class="form-group">
@@ -118,13 +112,13 @@ async function submitForm() {
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input id="password" v-model="form.password" type="password" required placeholder="Mot de passe" class="input-style" />
+        <input id="password" v-model="form.password" type="password" required placeholder="Password" class="input-style" />
       </div>
       <div class="form-group">
-        <label for="image">Image du restaurant</label>
+        <label for="image">Restaurant image</label>
         <input id="image" type="file" accept="image/*" @change="handleFileChange" class="input-style file-input" />
       </div>
-      <button type="submit" class="add-to-cart-btn">Ajouter</button>
+      <button type="submit" class="add-to-cart-btn">Add</button>
     </form>
   </div>
 </template>

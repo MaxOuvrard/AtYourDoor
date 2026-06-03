@@ -1,9 +1,9 @@
-		
 {
   "hello": "Hello",
   "welcome": "Welcome to AtYourDoor!",
   "access_restaurants": "Access restaurants",
   "home_title": "AtYourDoor, the number 1 platform for home meal delivery, worldwide",
+  "toggle_lang": "Switch language",
   "header": {
     "home": "Home",
     "restaurants": "Restaurants",
@@ -25,18 +25,34 @@
   },
   "login": {
     "title": "Login",
-    "username": "Username:",
-    "username_placeholder": "Enter your username",
+    "username": "Email:",
+    "username_placeholder": "Enter your email",
     "password": "Password:",
     "password_placeholder": "Enter your password",
     "signing_in": "Signing in…",
     "logging_in": "Logging in...",
     "login_btn": "Login",
     "errors": {
-      "missing_fields": "Please provide both username and password.",
-      "invalid_credentials": "Invalid username or password.",
+      "missing_fields": "Please provide both email and password.",
+      "invalid_credentials": "Invalid email or password.",
       "server": "Server error. Please try again later."
     }
+  },
+  "register": {
+    "title": "Create an account",
+    "name": "First name",
+    "email": "Email",
+    "password": "Password",
+    "password_placeholder": "Minimum 6 characters",
+    "confirmPassword": "Confirm password",
+    "confirmPassword_placeholder": "Confirm your password",
+    "role": "Account type",
+    "role_user": "Customer",
+    "submit": "Sign up"
+  },
+  "commandes": {
+    "title": "My Orders",
+    "quantity": "Quantity:"
   },
   "admin": {
     "add_restaurant": "Add a restaurant",
@@ -49,34 +65,9 @@
     "delete_error": "Error while deleting.",
     "delete": "Delete",
     "confirm_delete_title": "Confirm deletion",
-    "confirm_delete_text": "Do you really want to delete this restaurant? This action is irreversible.",
+    "confirm_delete_text": "Do you really want to delete this restaurant?",
     "cancel": "Cancel",
     "none_found": "No restaurant found."
-  },
-  "mesplats": {
-    "title": "My dishes",
-    "add": "Add a dish",
-    "loading": "Loading...",
-    "network_error": "Network error.",
-    "load_error": "Error while loading dishes.",
-    "not_authenticated": "User not authenticated.",
-    "none_found": "No dish found for your restaurant."
-  },
-  "register": {
-    "title": "Create an account",
-    "name": "Name",
-    "email": "Email",
-    "password": "Password",
-    "password_placeholder": "Enter your password",
-    "confirmPassword": "Confirm password",
-    "confirmPassword_placeholder": "Confirm your password",
-    "role": "Role",
-    "role_user": "User",
-    "submit": "Sign up"
-  },
-  "commandes": {
-    "title": "My Orders",
-    "quantity": "Quantity:"
   },
   "owner": {
     "title": "My Restaurant",
@@ -89,8 +80,16 @@
     "image_alt": "Restaurant image",
     "address_placeholder": "Address",
     "postal_placeholder": "Postal code",
-    "update_btn": "Update",
-    "updating": "Updating..."
+    "update_btn": "Update"
+  },
+  "mesplats": {
+    "title": "My dishes",
+    "add": "Add a dish",
+    "loading": "Loading...",
+    "network_error": "Network error.",
+    "load_error": "Error while loading dishes.",
+    "not_authenticated": "User not authenticated.",
+    "none_found": "No dish found for your restaurant."
   },
   "ajouterPlat": {
     "retour": "Back",
@@ -98,7 +97,7 @@
     "nom": "Dish name",
     "description": "Description",
     "prix": "Price (€)",
-    "image": "Image (file)",
+    "image": "Image (URL)",
     "apercu": "Preview",
     "ajoutEnCours": "Adding...",
     "ajouter": "Add"

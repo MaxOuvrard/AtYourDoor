@@ -1,6 +1,9 @@
+import dotenvx from "@dotenvx/dotenvx";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client.js";
 import bcrypt from "bcryptjs";
+
+dotenvx.config();
 
 const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
@@ -18,6 +21,18 @@ async function main() {
       password: await hash("Admin1234!"),
       firstName: "Super",
       lastName: "Admin",
+      role: "ADMIN",
+    },
+  });
+
+  const adminLogin = await prisma.user.upsert({
+    where: { email: "admin@admin.com" },
+    update: {},
+    create: {
+      email: "admin@admin.com",
+      password: await hash("admin"),
+      firstName: "Admin",
+      lastName: "User",
       role: "ADMIN",
     },
   });
@@ -216,7 +231,7 @@ async function main() {
   });
 
   console.log("✓ Seed terminé —", {
-    users: [admin.email, ownerMario.email, ownerAkira.email, userAlice.email, userBob.email],
+    users: [admin.email, adminLogin.email, ownerMario.email, ownerAkira.email, userAlice.email, userBob.email],
     restaurants: [pizzeria.name, sushiBar.name],
     plats: [margherita.name, quattroFormaggi.name, tiramisu.name, salmonMaki.name, thonSashimi.name, edamame.name],
     commandes: [commandeAlice.id],

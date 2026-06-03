@@ -1,49 +1,49 @@
 <template>
-  <Header />
-  <div class="page-root">
-    
-    <!-- Background carousel (behind content) -->
-      <div class="bg-carousel" aria-hidden="true">
-        <div
-          v-for="(img, i) in slides"
-          :key="i"
-          :class="['slide', { active: i === currentIndex }]"
-          :style="{ backgroundImage: `url('${img}'), linear-gradient(135deg, rgba(229,57,53,0.25), rgba(255,143,0,0.15))` }"
-        ></div>
-        <div class="bg-overlay"></div>
+  <div class="auth-bg page-root">
+
+    <!-- Carousel background -->
+    <div class="bg-carousel" aria-hidden="true">
+      <div
+        v-for="(img, i) in slides" :key="i"
+        :class="['slide', { active: i === currentIndex }]"
+        :style="{ backgroundImage: `url('${img}')` }"
+      ></div>
+      <div class="bg-overlay"></div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card__logo">
+        <img src="/images/Logo_header.png" alt="AtYourDoor" />
       </div>
-    
-    <div class="login-container">
-      <form @submit.prevent="handleLogin()">
-        <h1>{{ $t('login.title') }}</h1>
+      <h1 class="auth-card__title">{{ $t('login.title') }}</h1>
+      <p class="auth-card__sub">Bon retour ! Connectez-vous à votre compte.</p>
+
+      <div v-if="error" class="auth-error">{{ error }}</div>
+
+      <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="username">{{ $t('login.username') }}</label>
           <input type="text" id="username" v-model="username" required :placeholder="$t('login.username_placeholder')" />
         </div>
-
         <div class="form-group">
           <label for="password">{{ $t('login.password') }}</label>
           <input type="password" id="password" v-model="password" required :placeholder="$t('login.password_placeholder')" />
         </div>
 
-        <div class="form-group" v-if="error" style="color:var(--error, #c00);">
-          {{ error }}
-        </div>
-
-        <div class="form-group" v-if="loading">
-          <div class="loading"><span class="spinner" aria-hidden></span> {{ $t('login.signing_in') }}</div>
-        </div>
-
-        <div class="form-group">
-          <button type="submit" :disabled="loading">{{ loading ? $t('login.logging_in') : $t('login.login_btn') }}</button>
-        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;border-radius:12px;margin-top:4px;" :disabled="loading">
+          <span v-if="loading" class="spinner"></span>
+          {{ loading ? $t('login.logging_in') : $t('login.login_btn') }}
+        </button>
       </form>
+
+      <div class="auth-card__footer">
+        Pas encore de compte ? <NuxtLink to="/register">Créer un compte</NuxtLink>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -52,9 +52,8 @@ import { useSeoMeta } from 'nuxt/app';
 
 useSeoMeta({
   title: "Connexion - AtYourDoor",
-  description: "Connectez-vous à votre compte AtYourDoor pour accéder à vos commandes et restaurants favoris.",
+  description: "Connectez-vous à votre compte AtYourDoor.",
   ogTitle: "Connexion - AtYourDoor",
-  ogDescription: "Accédez à votre espace personnel sur AtYourDoor, la plateforme de livraison de repas.",
   ogImage: "/images/home/home_jap.jpg",
   twitterCard: "summary_large_image"
 });
@@ -67,7 +66,6 @@ const router = useRouter()
 const userStore = useUserStore()
 const { t } = useI18n()
 
-// Build slides array from images in public/images/home
 const slides = [
   '/images/home/home_jap.jpg',
   '/images/home/menu_burger.jpg',
@@ -80,27 +78,16 @@ async function handleLogin() {
   error.value = ''
   try {
     const res: any = await userStore.login(username.value, password.value)
-    // Si l'API retourne une erreur explicite
     if (res && typeof res === 'object' && 'error' in res && res.error) {
-      // Translate server error keys (e.g. "login.errors.invalid_credentials")
-      try {
-        error.value = typeof res.error === 'string' ? t(res.error as string) : String(res.error)
-      } catch (e) {
-        error.value = String(res.error)
-      }
+      try { error.value = typeof res.error === 'string' ? t(res.error as string) : String(res.error) }
+      catch { error.value = String(res.error) }
       return
     }
-    // Si le store a bien été mis à jour, on utilise userStore.user
     const role = userStore.user?.role
-    if (role === 'OWNER') {
-      await router.push('/owner')
-    } else if (role === 'ADMIN') {
-      await router.push('/admin')
-    } else if (role) {
-      await router.push('/restaurants')
-    } else {
-      error.value = "Erreur inconnue."
-    }
+    if (role === 'OWNER') await router.push('/owner')
+    else if (role === 'ADMIN') await router.push('/admin')
+    else if (role) await router.push('/restaurants')
+    else error.value = 'Erreur inconnue.'
   } catch (e: any) {
     error.value = e?.message || 'Erreur lors de la connexion.'
   } finally {
@@ -108,14 +95,13 @@ async function handleLogin() {
   }
 }
 
-// Carousel control: show each image for 15s then move to next, loop
 const currentIndex = ref(0)
 let intervalId: ReturnType<typeof setInterval> | null = null
 onMounted(() => {
   document?.body?.classList?.add('no-scroll')
   intervalId = setInterval(() => {
     currentIndex.value = (currentIndex.value + 1) % slides.length
-  }, 15000) // 15 seconds per slide
+  }, 5000)
 })
 onUnmounted(() => {
   document?.body?.classList?.remove('no-scroll')
@@ -124,4 +110,3 @@ onUnmounted(() => {
 </script>
 
 <style src="../../assets/css/style.css"></style>
-

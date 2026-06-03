@@ -6,7 +6,9 @@ import type { Restaurant } from "../../modules/restaurant/types";
 import { useUserStore } from "../../../stores/userStore";
 import { storeToRefs } from "pinia";
 import { useRouter } from 'vue-router';
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
+import { mapPaginatedRestaurants } from '../../../utils/mappers'
+import { apiFetch } from '../../../utils/api'
 
 const userStore = useUserStore();
 const { user, isAuthenticated } = storeToRefs(userStore);
@@ -19,9 +21,11 @@ onMounted(() => {
   }
 });
 
-const { data: restaurants, refresh } = await useAsyncData("restaurants-admin", () =>
-  $fetch<Restaurant[]>("/api/restaurants")
+const { data: rawRestaurants, refresh } = await useAsyncData("restaurants-admin", () =>
+  apiFetch("/api/restaurants")
 );
+
+const restaurants = computed<Restaurant[]>(() => mapPaginatedRestaurants(rawRestaurants.value))
 
 import { ref } from 'vue';
 import AppImage from '~/components/AppImage.vue'
@@ -36,8 +40,11 @@ function askDelete(id: number) {
 }
 
 function removeRestaurantFromList(id: number) {
-  if (restaurants.value) {
-    restaurants.value = restaurants.value.filter(r => r.id !== id);
+  if (rawRestaurants.value?.data) {
+    rawRestaurants.value = {
+      ...rawRestaurants.value,
+      data: rawRestaurants.value.data.filter((r: any) => r.id !== id),
+    }
   }
 }
 
@@ -47,7 +54,7 @@ async function confirmDelete() {
     removeRestaurantFromList(id); // MAJ immédiate côté UI
     showConfirm.value = false;
     try {
-      await $fetch(`/api/restaurants/delete?restaurant_id=${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/restaurants/${id}`, { method: "DELETE" });
     } catch (e) {
       errorDelete.value = $t('admin.delete_error');
       refresh(); // rollback si erreur
@@ -100,7 +107,7 @@ function cancelDelete() {
             </button>
           </td>
         </tr>
-        <tr v-if="!restaurants || restaurants.length === 0">
+        <tr v-if="restaurants.length === 0">
           <td colspan="5" style="text-align: center; color: var(--muted); padding: 24px 0;">{{ $t('admin.none_found') }}</td>
         </tr>
       </tbody>

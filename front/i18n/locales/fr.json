@@ -1,0 +1,122 @@
+{
+  "hello": "Bonjour",
+  "welcome": "Bienvenue sur AtYourDoor !",
+  "access_restaurants": "Accéder aux restaurants",
+  "home_title": "AtYourDoor, la plateforme numéro 1 de livraisons de repas à domicile",
+  "toggle_lang": "Changer de langue",
+  "header": {
+    "home": "Accueil",
+    "restaurants": "Restaurants",
+    "profile": "Profil",
+    "orders": "Commandes",
+    "admin": "Restaurateur",
+    "my_restaurant": "Mon restaurant",
+    "my_dishes": "Mes plats",
+    "logout": "Déconnexion",
+    "login": "Se connecter",
+    "register": "Créer un compte",
+    "toggle_lang": "Changer de langue",
+    "cart": "Panier",
+    "total": "Total",
+    "checkout": "Commander",
+    "order_name": "Nom de la commande",
+    "cancel": "Annuler",
+    "cart_empty": "Votre panier est vide"
+  },
+  "login": {
+    "title": "Se connecter",
+    "username": "Email :",
+    "username_placeholder": "Entrez votre email",
+    "password": "Mot de passe :",
+    "password_placeholder": "Entrez votre mot de passe",
+    "signing_in": "Connexion en cours…",
+    "logging_in": "Connexion...",
+    "login_btn": "Connexion",
+    "errors": {
+      "missing_fields": "Veuillez fournir l'email et le mot de passe.",
+      "invalid_credentials": "Email ou mot de passe invalide.",
+      "server": "Erreur du serveur. Veuillez réessayer plus tard."
+    }
+  },
+  "register": {
+    "title": "Créer un compte",
+    "name": "Prénom",
+    "email": "Email",
+    "password": "Mot de passe",
+    "password_placeholder": "Minimum 6 caractères",
+    "confirmPassword": "Confirmer le mot de passe",
+    "confirmPassword_placeholder": "Confirmez votre mot de passe",
+    "role": "Type de compte",
+    "role_user": "Client",
+    "submit": "S'inscrire"
+  },
+  "commandes": {
+    "title": "Mes Commandes",
+    "quantity": "Quantité :"
+  },
+  "admin": {
+    "add_restaurant": "Ajouter un restaurant",
+    "title": "Gestion des restaurants",
+    "image": "Image",
+    "name": "Nom",
+    "city": "Ville",
+    "category": "Catégorie",
+    "actions": "Actions",
+    "delete_error": "Erreur lors de la suppression.",
+    "delete": "Supprimer",
+    "confirm_delete_title": "Confirmer la suppression",
+    "confirm_delete_text": "Voulez-vous vraiment supprimer ce restaurant ?",
+    "cancel": "Annuler",
+    "none_found": "Aucun restaurant trouvé."
+  },
+  "owner": {
+    "title": "Mon Restaurant",
+    "name_label": "Nom du restaurant",
+    "name_placeholder": "Nom du restaurant",
+    "city_label": "Ville",
+    "city_placeholder": "Ville",
+    "category_label": "Catégorie",
+    "image_label": "Image",
+    "image_alt": "Image du restaurant",
+    "address_placeholder": "Adresse",
+    "postal_placeholder": "Code postal",
+    "update_btn": "Modifier"
+  },
+  "mesplats": {
+    "title": "Mes plats",
+    "add": "Ajouter un plat",
+    "loading": "Chargement...",
+    "network_error": "Erreur réseau.",
+    "load_error": "Erreur lors du chargement des plats.",
+    "not_authenticated": "Utilisateur non authentifié.",
+    "none_found": "Aucun plat trouvé pour votre restaurant."
+  },
+  "ajouterPlat": {
+    "retour": "Retour",
+    "titre": "Ajouter un plat",
+    "nom": "Nom du plat",
+    "description": "Description",
+    "prix": "Prix (€)",
+    "image": "Image (URL)",
+    "apercu": "Aperçu",
+    "ajoutEnCours": "Ajout en cours...",
+    "ajouter": "Ajouter"
+  },
+  "editPlat": {
+    "back": "← Retour",
+    "title": "Éditer le plat",
+    "loading": "Chargement du plat...",
+    "name": "Nom",
+    "price": "Prix (€)",
+    "description": "Description",
+    "image_url": "Image (URL)",
+    "category": "Catégorie",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "saved": "Plat enregistré.",
+    "not_authenticated": "Non authentifié",
+    "name_required": "Le nom est requis.",
+    "price_positive": "Le prix doit être un nombre positif.",
+    "network_error": "Erreur réseau"
+  }
+}

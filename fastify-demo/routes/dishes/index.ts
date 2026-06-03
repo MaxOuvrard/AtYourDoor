@@ -15,6 +15,27 @@ import { ErrorResponseSchema } from "../../schemas/error.schema.js";
 export const dishRoutes = async (app: FastifyInstance) => {
   const service = new DishService(app.prisma);
 
+  // GET /dishes — tous les plats, public, paginé
+  app.get<{ Querystring: PaginationParams }>(
+    "/dishes",
+    {
+      schema: {
+        tags: ["dishes"],
+        summary: "Lister tous les plats",
+        querystring: PaginationQuerySchema,
+        response: { 200: PaginatedDishesSchema },
+      },
+    },
+    async (request, reply) => {
+      const { limit = 20, offset = 0 } = request.query;
+      const [data, total] = await Promise.all([
+        app.prisma.plat.findMany({ skip: offset, take: limit, orderBy: { createdAt: "desc" } }),
+        app.prisma.plat.count(),
+      ]);
+      return reply.send({ data, pagination: { total, limit, offset } });
+    },
+  );
+
   // GET /restaurants/:restaurantId/dishes — public, paginé
   app.get<{ Params: { restaurantId: string }; Querystring: PaginationParams }>(
     "/restaurants/:restaurantId/dishes",

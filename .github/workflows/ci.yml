@@ -33,11 +33,12 @@ jobs:
           - 3306:3306
 
     steps:
-      - name: Set image name (lowercase)
-        run: echo "IMAGE_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set image name (lowercase)
+        working-directory: ${{ github.workspace }}
+        run: echo "IMAGE_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Setup Node.js 22
         uses: actions/setup-node@v4

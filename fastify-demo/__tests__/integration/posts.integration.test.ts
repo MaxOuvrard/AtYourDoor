@@ -175,8 +175,8 @@ describe("Orders Integration Tests", () => {
       });
 
       expect(response.statusCode).toBe(200);
-      expect(Array.isArray(response.json())).toBe(true);
-      expect(response.json().length).toBe(1);
+      expect(Array.isArray(response.json().data)).toBe(true);
+      expect(response.json().data.length).toBe(1);
     });
 
     it("should not see orders from another user", async () => {
@@ -204,7 +204,7 @@ describe("Orders Integration Tests", () => {
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.json().length).toBe(0);
+      expect(response.json().data.length).toBe(0);
     });
   });
 
@@ -228,7 +228,7 @@ describe("Orders Integration Tests", () => {
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.json().length).toBe(1);
+      expect(response.json().data.length).toBe(1);
     });
   });
 

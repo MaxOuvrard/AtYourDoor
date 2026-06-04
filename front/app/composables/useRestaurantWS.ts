@@ -14,15 +14,16 @@ export function useRestaurantWS(onNewOrder: (notif: WSOrderNotif) => void) {
   let ws: WebSocket | null = null
   let pingInterval: ReturnType<typeof setInterval> | null = null
 
+  const config = useRuntimeConfig()
+  const userStore = useUserStore()
+
   function connect() {
     if (typeof window === 'undefined') return
-    const userStore = useUserStore()
     const token = userStore.token
     if (!token) return
 
-    const config = useRuntimeConfig()
-    const apiBase = String(config.public.apiBase || 'http://localhost:3001')
-    const wsBase = apiBase.replace(/^http/, 'ws')
+    const apiBase = String(config.public.apiBase || 'http://localhost:3000')
+    const wsBase = apiBase.replace(/^https?/, (p) => (p === 'https' ? 'wss' : 'ws'))
     const wsUrl = `${wsBase}/ws/restaurant`
 
     try {

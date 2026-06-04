@@ -108,6 +108,8 @@ export class RestaurantService {
       throw new ForbiddenError("Accès non autorisé");
     }
 
+    const deleted = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
     await this.prisma.restaurant.delete({ where: { id: restaurantId } });
+    return deleted!;
   }
 }

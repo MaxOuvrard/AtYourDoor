@@ -74,6 +74,7 @@ const STATUS_MAP_REVERSE: Record<string, string> = {
 }
 
 export function mapStatus(backendStatus: string): string {
+  if (!backendStatus) return ''
   return STATUS_MAP[backendStatus] ?? backendStatus.toLowerCase()
 }
 

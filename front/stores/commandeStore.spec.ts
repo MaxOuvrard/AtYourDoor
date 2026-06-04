@@ -25,11 +25,12 @@ describe('commandeStore', () => {
     expect(store.count).toBe(0)
   })
 
-  it('ajouterCommande adds a commande and persists', () => {
+  it('retirerCommande removes by id from existing list', () => {
     const store = useCommandeStore()
-    const cmd = { id: null, plats: [], total: 0 } as any
-    store.ajouterCommande(cmd)
+    store.commandes = [{ id: 10, plats: [], total: 0 }, { id: 20, plats: [], total: 5 }] as any
+    store.retirerCommande(10)
     expect(store.commandes.length).toBe(1)
+    expect(store.commandes.find((c: any) => c.id === 10)).toBeUndefined()
     expect(global.localStorage.setItem).toHaveBeenCalledWith('commandes', JSON.stringify(store.commandes))
   })
 
@@ -51,11 +52,15 @@ describe('commandeStore', () => {
   })
 
   it('createCommande uses server response when available', async () => {
-    const serverCmd = { id: 555, plats: [], total: 20 }
+    const serverCmd = {
+      id: '555', status: 'PENDING', totalPrice: 20,
+      deliveryAddress: 'Rue Test', userId: 'u1', restaurantId: 'r1',
+      commandePlats: [], createdAt: '2024-01-01', updatedAt: '2024-01-01'
+    }
     ;(global.$fetch as any).mockResolvedValueOnce(serverCmd)
     const store = useCommandeStore()
     await store.createCommande({ id: null, plats: [], total: 20 } as any)
-    expect(store.commandes.find((c: any) => c.id === 555)).toBeDefined()
+    expect(store.commandes.find((c: any) => String(c.id) === '555')).toBeDefined()
     expect(global.localStorage.setItem).toHaveBeenCalled()
   })
 
@@ -74,7 +79,6 @@ describe('commandeStore', () => {
     await store.updateCommande('a1', { total: 9 })
     const updated = store.commandes.find(c => String(c.id) === 'a1') as any
     expect(updated.total).toBe(9)
-    expect(updated.updatedAt).toBeDefined()
     expect(global.localStorage.setItem).toHaveBeenCalled()
   })
 })

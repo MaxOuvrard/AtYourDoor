@@ -131,7 +131,7 @@ export const restaurantRoutes = async (app: FastifyInstance) => {
         summary: "Supprimer un restaurant",
         params: Type.Object({ id: Type.String() }),
         response: {
-          204: Type.Null(),
+          200: RestaurantResponseSchema,
           401: ErrorResponseSchema,
           403: ErrorResponseSchema,
           404: ErrorResponseSchema,
@@ -139,12 +139,12 @@ export const restaurantRoutes = async (app: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      await service.deleteRestaurant(
+      const restaurant = await service.deleteRestaurant(
         request.params.id,
         request.user.id,
         request.user.role,
       );
-      return reply.status(204).send();
+      return reply.send(restaurant);
     },
   );
 };

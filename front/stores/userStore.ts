@@ -49,7 +49,13 @@ export const useUserStore = defineStore('user', {
         body: { email, password }
       })
       if (res?.token) {
-        const mappedUser = mapUser(res.user)
+        this.token = res.token
+        if (typeof window !== 'undefined') localStorage.setItem('token', res.token)
+        let userData = res.user
+        if (!userData) {
+          userData = await apiFetch<any>('/api/auth/me')
+        }
+        const mappedUser = mapUser(userData)
         this._persist(res.token, mappedUser)
       }
       return res

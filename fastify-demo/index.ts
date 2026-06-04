@@ -1,8 +1,5 @@
 import "./config/dotenvx.js";
 import fastify from "fastify";
-import cors from "@fastify/cors";
-import swagger from "@fastify/swagger";
-import swaggerUi from "@fastify/swagger-ui";
 import websocketPlugin from "@fastify/websocket";
 import { registerRoutes } from "./routes/index.js";
 import { websocketRoutes } from "./routes/websocket.js";
@@ -32,10 +29,10 @@ const start = async () => {
 
     server.decorate("prisma", prisma);
 
-    await server.register(cors, { origin: true, credentials: true });
+    await server.register(import("@fastify/cors"), { origin: true, credentials: true });
 
     // ── Swagger / OpenAPI ──────────────────────────────────────────────────
-    await server.register(swagger, {
+    await server.register(import("@fastify/swagger"), {
       openapi: {
         openapi: "3.0.0",
         info: {
@@ -56,7 +53,7 @@ const start = async () => {
       },
     });
 
-    await server.register(swaggerUi, {
+    await server.register(import("@fastify/swagger-ui"), {
       routePrefix: "/docs",
       uiConfig: { docExpansion: "list", deepLinking: true },
     });

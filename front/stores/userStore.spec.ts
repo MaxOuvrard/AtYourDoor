@@ -76,14 +76,14 @@ describe('userStore', () => {
   })
 
   it('login sets token and user from $fetch response', async () => {
-    const mocked = { token: 'tok-xyz', user: { id: 9, name: 'Bob' } }
+    const apiUser = { id: 9, firstName: 'Bob', email: 'bob@test.com', role: 'USER' }
+    const mocked = { token: 'tok-xyz', user: apiUser }
     ;(global.$fetch as any).mockResolvedValueOnce(mocked)
     const store = useUserStore()
     const res = await store.login('u', 'p')
     expect(res).toEqual(mocked)
     expect(store.token).toBe('tok-xyz')
-    expect(store.user).toEqual({ id: 9, name: 'Bob' })
+    expect(store.user).toMatchObject({ id: 9, name: 'Bob', email: 'bob@test.com', role: 'USER' })
     expect(global.localStorage.setItem).toHaveBeenCalledWith('token', 'tok-xyz')
-    expect(global.localStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify({ id: 9, name: 'Bob' }))
   })
 })

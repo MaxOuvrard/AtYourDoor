@@ -12,6 +12,7 @@ export default fp(async function (fastify: FastifyInstance, _options = {}) {
 
   await fastify.register(fastifyJwt, {
     secret: jwtSecret,
+    sign: { expiresIn: "15m" },
   });
 
   fastify.decorate(

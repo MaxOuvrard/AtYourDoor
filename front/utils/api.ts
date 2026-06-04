@@ -1,13 +1,15 @@
+declare function useRuntimeConfig(): { public: Record<string, unknown> }
+
 function getApiBase(): string {
   if (typeof window === 'undefined') {
-    return process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001'
+    return process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000'
   }
 
   try {
     const config = useRuntimeConfig()
-    return config.public?.apiBase || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001'
+    return config.public?.apiBase || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000'
   } catch {
-    return process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001'
+    return process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000'
   }
 }
 
@@ -23,35 +25,18 @@ function getToken(): string {
   return localStorage.getItem('token') || ''
 }
 
-export async function apiFetch<T = any>(path: string, opts?: any): Promise<T | null> {
-  const token = getToken()
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {}
-
-  const mergedOpts = {
-    ...opts,
-    headers: {
-      ...authHeader,
-      ...(opts?.headers || {}),
-    },
-  }
-
+async function doFetch<T>(url: string, opts: any): Promise<T | null> {
   const globalAny: any = globalThis as any
 
-  const requestUrl = resolveApiUrl(path)
-
   if (typeof globalAny.$fetch === 'function') {
-    try {
-      return (await globalAny.$fetch(requestUrl, mergedOpts)) as T
-    } catch (e: any) {
-      throw e instanceof Error ? e : new Error(e?.message || 'Fetch error')
-    }
+    return (await globalAny.$fetch(url, opts)) as T
   }
 
   if (typeof globalAny.fetch !== 'function') {
     throw new Error('No fetch implementation available')
   }
 
-  const { method = 'GET', body, headers = {} } = mergedOpts
+  const { method = 'GET', body, headers = {} } = opts
   const fetchOptions: any = { method, headers: { ...headers } }
 
   if (body !== undefined) {
@@ -64,24 +49,58 @@ export async function apiFetch<T = any>(path: string, opts?: any): Promise<T | n
     }
   }
 
-  const res = await globalAny.fetch(requestUrl, fetchOptions)
+  const res = await globalAny.fetch(url, fetchOptions)
   const text = await res.text()
 
   if (!text) {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (!res.ok) throw Object.assign(new Error(`HTTP ${res.status}`), { statusCode: res.status })
     return null
   }
 
+  const json = JSON.parse(text)
+  if (!res.ok) {
+    const msg = (json && (json.detail || json.error || json.message)) || `HTTP ${res.status}`
+    throw Object.assign(new Error(msg), { statusCode: res.status })
+  }
+  return json as T
+}
+
+let _refreshing: Promise<boolean> | null = null
+
+export async function apiFetch<T = any>(path: string, opts?: any, _retry = false): Promise<T | null> {
+  const token = getToken()
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {}
+
+  const mergedOpts = {
+    ...opts,
+    headers: { ...authHeader, ...(opts?.headers || {}) },
+  }
+
+  const requestUrl = resolveApiUrl(path)
+
   try {
-    const json = JSON.parse(text)
-    if (!res.ok) {
-      const msg = (json && (json.detail || json.error || json.message)) || `HTTP ${res.status}`
-      throw new Error(msg)
-    }
-    return json as T
+    return await doFetch<T>(requestUrl, mergedOpts)
   } catch (e: any) {
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`)
-    return text as unknown as T
+    const status = e?.statusCode ?? e?.response?.status ?? e?.status
+    // Auto-refresh sur 401, sauf si c'est déjà la route refresh/logout
+    if (status === 401 && !_retry && !path.includes('/auth/refresh') && !path.includes('/auth/logout')) {
+      if (!_refreshing) {
+        _refreshing = (async () => {
+          try {
+            const { useUserStore } = await import('../stores/userStore')
+            const store = useUserStore()
+            return await store.refresh()
+          } finally {
+            _refreshing = null
+          }
+        })()
+      }
+      const refreshed = await _refreshing
+      if (refreshed) {
+        return apiFetch<T>(path, opts, true)
+      }
+    }
+    throw e instanceof Error ? e : new Error(e?.message || 'Fetch error')
   }
 }
 

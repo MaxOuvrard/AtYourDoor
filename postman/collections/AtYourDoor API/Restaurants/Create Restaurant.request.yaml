@@ -1,0 +1,20 @@
+$kind: http-request
+name: Create Restaurant
+method: POST
+url: '{{baseUrl}}/api/restaurants'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "resto@example.com",
+      "password": "password123",
+      "name": "Le Bon Resto",
+      "address": "12 rue de la Paix, Paris",
+      "description": "Un super restaurant",
+      "phone": "+33100000000",
+      "imageUrl": "https://example.com/image.jpg"
+    }

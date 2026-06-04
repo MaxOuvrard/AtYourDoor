@@ -3,8 +3,8 @@ import { ref, computed, watch } from 'vue';
 import AppImage from '~/components/AppImage.vue'
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '../../../../stores/userStore';
-import { useRestaurantStore } from '../../../../stores/restaurantStore';
 import type { Plat } from '~/modules/plat/types';
+import { friendlyError } from '../../../../utils/errors';
 
 const route = useRoute();
 const router = useRouter();
@@ -17,7 +17,6 @@ const error = ref('');
 const success = ref('');
 
 const form = ref<Partial<Plat>>({});
-const restaurantStore = useRestaurantStore();
 const categories = ref<string[]>([]);
 const imageError = ref(false);
 const imageVersion = ref(0);
@@ -63,7 +62,7 @@ watch(() => (form.value as any)?.image, (newVal) => {
 });
 
 // Use useAsyncData to load plat and categories
-const { data: platData, pending: platPending, error: platFetchError } = await useAsyncData<Plat | null>(`plat-${platId}`, () => $fetch(`/api/plats/${platId}`));
+const { data: platData } = await useAsyncData<Plat | null>(`plat-${platId}`, () => $fetch(`/api/plats/${platId}`));
 const { data: catsData } = await useAsyncData<string[]>(`categories`, () => $fetch('/api/restaurants/categories'));
 
 // Initialize form and categories when async data arrives
@@ -117,7 +116,7 @@ async function save() {
     }
 
     // Use POST to new API endpoint to update plats.json
-    const res = await $fetch('/api/plats/update', {
+    await $fetch('/api/plats/update', {
       method: 'POST',
       body: form.value,
       headers: {
@@ -128,15 +127,13 @@ async function save() {
     success.value = $t('editPlat.saved');
     error.value = '';
   } catch (e: any) {
-    error.value = e?.message || $t('editPlat.network_error');
+    error.value = friendlyError(e, 'Erreur lors de la sauvegarde du plat.');
   } finally {
     saving.value = false;
   }
 }
 
-function cancel() {
-  router.back();
-}
+
 </script>
 
 <template>

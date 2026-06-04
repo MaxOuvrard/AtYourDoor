@@ -1,0 +1,19 @@
+$kind: collection
+name: AtYourDoor API
+description: REST API for the AtYourDoor food delivery platform (Fastify + Prisma backend). All authenticated routes require a Bearer JWT token.
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+variables:
+  - key: baseUrl
+    value: 'http://localhost:3000'
+  - key: token
+    value: ''
+  - key: refreshToken
+    value: ''
+  - key: restaurantId
+    value: ''
+  - key: dishId
+    value: ''

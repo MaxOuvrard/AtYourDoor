@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: fe36e0ec-e888-48d2-8c5e-65496d8b31ef
+
+localResources:
+  collections:
+    - ..\fastify-demo\postman_collection.json

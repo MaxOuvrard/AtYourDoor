@@ -38,6 +38,7 @@
                     </template>
                     <template v-else-if="userRole === 'ADMIN'">
                         <NuxtLink to="/admin" class="nav-link">{{ $t('header.admin') }}</NuxtLink>
+                        <NuxtLink to="/admin/users" class="nav-link">{{ $t('header.users') }}</NuxtLink>
                     </template>
                     <template v-else-if="userRole === 'OWNER'">
                         <NuxtLink to="/owner" class="nav-link">{{ $t('header.my_restaurant') }}</NuxtLink>
@@ -190,6 +191,7 @@ async function toggleLocale() {
 .container { max-width: 1100px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .brand { display: flex; align-items: center; text-decoration: none; }
 .logo { height: 48px; width: auto; display: block; }
+.brand :deep(img) { height: 48px; width: auto; display: block; }
 .nav { display: flex; gap: 18px; align-items: center; }
 .nav-link { color: var(--text, #0f172a); text-decoration: none; font-weight: 600; padding: 6px 10px; border-radius: 8px; transition: background .12s ease, color .12s ease; }
 .nav-link:hover { background: rgba(69,90,100,0.06); color: var(--accent, #E53935); }

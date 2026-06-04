@@ -1,0 +1,21 @@
+$kind: http-request
+name: Create Order
+method: POST
+url: '{{baseUrl}}/api/orders'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "restaurantId": "{{restaurantId}}",
+      "deliveryAddress": "5 avenue des Champs-Élysées, Paris",
+      "items": [
+        {
+          "dishId": "{{dishId}}",
+          "quantity": 2
+        }
+      ]
+    }

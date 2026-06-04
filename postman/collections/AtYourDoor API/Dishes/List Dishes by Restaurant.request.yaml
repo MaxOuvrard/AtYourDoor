@@ -1,0 +1,15 @@
+$kind: http-request
+name: List Dishes by Restaurant
+method: GET
+url: '{{baseUrl}}/api/restaurants/:restaurantId/dishes'
+order: 2000
+pathVariables:
+  - key: restaurantId
+    value: ''
+queryParams:
+  - key: limit
+    value: '20'
+  - key: offset
+    value: '0'
+auth:
+  type: noauth

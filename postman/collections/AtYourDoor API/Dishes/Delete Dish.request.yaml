@@ -1,0 +1,8 @@
+$kind: http-request
+name: Delete Dish
+method: DELETE
+url: '{{baseUrl}}/api/dishes/:id'
+order: 6000
+pathVariables:
+  - key: id
+    value: ''

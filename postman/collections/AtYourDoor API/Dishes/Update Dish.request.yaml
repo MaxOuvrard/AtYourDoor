@@ -1,0 +1,19 @@
+$kind: http-request
+name: Update Dish
+method: PATCH
+url: '{{baseUrl}}/api/dishes/:id'
+order: 5000
+pathVariables:
+  - key: id
+    value: ''
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Burger Deluxe",
+      "price": 14.5,
+      "available": true
+    }

@@ -4,6 +4,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '../../../../stores/userStore'
 import { useRouter } from 'vue-router'
 import { apiFetch } from '../../../../utils/api'
+import { friendlyError } from '../../../../utils/errors'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -27,7 +28,7 @@ async function fetchUsers() {
     const list = Array.isArray(res) ? res : (res?.data || [])
     users.value = list
   } catch (e: any) {
-    error.value = e?.message || 'Erreur lors du chargement.'
+    error.value = friendlyError(e, 'Erreur lors du chargement des utilisateurs.')
   } finally {
     loading.value = false
   }
@@ -57,7 +58,7 @@ async function createUser() {
     showCreate.value = false
     createForm.value = { email: '', firstName: '', lastName: '', password: '', role: 'USER' }
   } catch (e: any) {
-    createError.value = e?.message || 'Erreur lors de la création.'
+    createError.value = friendlyError(e, 'Erreur lors de la création de l\'utilisateur.')
   } finally {
     creating.value = false
   }
@@ -85,7 +86,7 @@ async function saveEdit() {
     if (idx !== -1) users.value[idx] = { ...users.value[idx], ...res }
     editingUser.value = null
   } catch (e: any) {
-    editError.value = e?.message || 'Erreur lors de la modification.'
+    editError.value = friendlyError(e, 'Erreur lors de la modification.')
   } finally {
     saving.value = false
   }
@@ -101,7 +102,7 @@ async function deleteUser(id: string) {
     await apiFetch(`/api/users/${id}`, { method: 'DELETE' })
     users.value = users.value.filter(u => u.id !== id)
   } catch (e: any) {
-    deleteError.value = e?.message || 'Erreur lors de la suppression.'
+    deleteError.value = friendlyError(e, 'Erreur lors de la suppression.')
   } finally {
     deletingId.value = null
   }

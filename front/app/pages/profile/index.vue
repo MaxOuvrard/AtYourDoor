@@ -71,6 +71,7 @@
 definePageMeta({ middleware: ('auth' as unknown) as any })
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '../../../stores/userStore'
+import { friendlyError } from '../../../utils/errors'
 
 const userStore = useUserStore()
 const email = ref('')
@@ -106,7 +107,7 @@ async function updateProfile() {
     confirmPassword.value = ''
     success.value = 'Profil mis à jour avec succès !'
   } catch (e: any) {
-    error.value = e?.message || 'Erreur lors de la mise à jour.'
+    error.value = friendlyError(e, 'Erreur lors de la mise à jour du profil.')
   } finally {
     saving.value = false
   }
@@ -118,7 +119,7 @@ async function deleteAccount() {
   try {
     await userStore.deleteAccount()
   } catch (e: any) {
-    deleteError.value = e?.message || 'Erreur lors de la suppression du compte.'
+    deleteError.value = friendlyError(e, 'Erreur lors de la suppression du compte.')
     deletingAccount.value = false
   }
 }

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get My Restaurant
+method: GET
+url: '{{baseUrl}}/api/restaurants/me'
+order: 2000

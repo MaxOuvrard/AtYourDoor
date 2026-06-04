@@ -73,9 +73,7 @@ watch(() => route.fullPath, async () => { await nextTick(); updateForRoute() })
 <style scoped>
 /* Offset the page content so it isn't hidden under the fixed header. Adjust the value if header height changes. */
 .page-offset {
-  padding-top: 72px; /* space for header */
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-top: 68px; /* space for header */
 }
 
 /* Skip link: initially hidden, visible on keyboard focus */
@@ -101,6 +99,6 @@ watch(() => route.fullPath, async () => { await nextTick(); updateForRoute() })
 }
 
 @media (max-width: 640px) {
-  .page-offset { padding-top: 68px; padding-left: 12px; padding-right: 12px }
+  .page-offset { padding-top: 60px; }
 }
 </style>

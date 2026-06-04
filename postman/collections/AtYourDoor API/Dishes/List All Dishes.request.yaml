@@ -1,0 +1,12 @@
+$kind: http-request
+name: List All Dishes
+method: GET
+url: '{{baseUrl}}/api/dishes'
+order: 1000
+queryParams:
+  - key: limit
+    value: '20'
+  - key: offset
+    value: '0'
+auth:
+  type: noauth

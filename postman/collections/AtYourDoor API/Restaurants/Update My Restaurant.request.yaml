@@ -1,0 +1,19 @@
+$kind: http-request
+name: Update My Restaurant
+method: PATCH
+url: '{{baseUrl}}/api/restaurants/me'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Le Meilleur Resto",
+      "address": "15 rue de la Paix, Paris",
+      "description": "Updated description",
+      "phone": "+33100000001",
+      "imageUrl": "https://example.com/new-image.jpg",
+      "status": "OPEN"
+    }

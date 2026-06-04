@@ -6,26 +6,26 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:3000',
     }
   },
 
   nitro: {
     devProxy: {
       '/api': {
-        target: process.env.API_URL || 'http://localhost:3000',
+        target: process.env.API_URL || 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
       '/docs': {
-        target: process.env.API_URL || 'http://localhost:3000',
+        target: process.env.API_URL || 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
       '/graphql': {
-        target: process.env.API_URL || 'http://localhost:3000',
+        target: process.env.API_URL || 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
       '/ws': {
-        target: process.env.API_URL || 'http://localhost:3000',
+        target: process.env.API_URL || 'http://127.0.0.1:3000',
         changeOrigin: true,
         ws: true,
       }

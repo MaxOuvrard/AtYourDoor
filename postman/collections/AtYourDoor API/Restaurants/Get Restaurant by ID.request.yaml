@@ -1,0 +1,10 @@
+$kind: http-request
+name: Get Restaurant by ID
+method: GET
+url: '{{baseUrl}}/api/restaurants/:id'
+order: 3000
+pathVariables:
+  - key: id
+    value: ''
+auth:
+  type: noauth

@@ -1,0 +1,17 @@
+$kind: http-request
+name: Create Dish
+method: POST
+url: '{{baseUrl}}/api/dishes'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Burger Classic",
+      "description": "Un délicieux burger",
+      "price": 12.5,
+      "imageUrl": "https://example.com/burger.jpg"
+    }

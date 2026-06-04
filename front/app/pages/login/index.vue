@@ -1,4 +1,5 @@
 <template>
+  <Header />
   <div class="auth-bg page-root">
 
     <!-- Carousel background -->
@@ -45,10 +46,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../../../stores/userStore'
-import { useSeoMeta } from 'nuxt/app';
+import { useSeoMeta } from 'nuxt/app'
+import { friendlyError } from '../../../utils/errors'
 
 useSeoMeta({
   title: "Connexion - AtYourDoor",
@@ -56,7 +57,7 @@ useSeoMeta({
   ogTitle: "Connexion - AtYourDoor",
   ogImage: "/images/home/home_jap.jpg",
   twitterCard: "summary_large_image"
-});
+})
 
 const username = ref('')
 const password = ref('')
@@ -64,7 +65,6 @@ const loading = ref(false)
 const error = ref('')
 const router = useRouter()
 const userStore = useUserStore()
-const { t } = useI18n()
 
 const slides = [
   '/images/home/home_jap.jpg',
@@ -77,19 +77,14 @@ async function handleLogin() {
   loading.value = true
   error.value = ''
   try {
-    const res: any = await userStore.login(username.value, password.value)
-    if (res && typeof res === 'object' && 'error' in res && res.error) {
-      try { error.value = typeof res.error === 'string' ? t(res.error as string) : String(res.error) }
-      catch { error.value = String(res.error) }
-      return
-    }
+    await userStore.login(username.value, password.value)
     const role = userStore.user?.role
     if (role === 'OWNER') await router.push('/owner')
     else if (role === 'ADMIN') await router.push('/admin')
     else if (role) await router.push('/restaurants')
-    else error.value = 'Erreur inconnue.'
+    else error.value = 'Connexion réussie mais le rôle est inconnu. Contactez le support.'
   } catch (e: any) {
-    error.value = e?.message || 'Erreur lors de la connexion.'
+    error.value = friendlyError(e, 'Email ou mot de passe incorrect.')
   } finally {
     loading.value = false
   }

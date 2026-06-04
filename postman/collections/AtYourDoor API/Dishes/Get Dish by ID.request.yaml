@@ -1,0 +1,10 @@
+$kind: http-request
+name: Get Dish by ID
+method: GET
+url: '{{baseUrl}}/api/dishes/:id'
+order: 3000
+pathVariables:
+  - key: id
+    value: ''
+auth:
+  type: noauth

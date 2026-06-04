@@ -1,16 +1,7 @@
-declare function useRuntimeConfig(): { public: Record<string, unknown> }
 
 function getApiBase(): string {
-  if (typeof window === 'undefined') {
-    return process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000'
-  }
-
-  try {
-    const config = useRuntimeConfig()
-    return config.public?.apiBase || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000'
-  } catch {
-    return process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000'
-  }
+  // 127.0.0.1 force IPv4 et évite que Docker intercepte via ::1 (localhost)
+  return process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:3000'
 }
 
 function resolveApiUrl(path: string): string {

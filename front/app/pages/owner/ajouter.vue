@@ -3,6 +3,7 @@ definePageMeta({ middleware: ('auth' as unknown) as any })
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { apiFetch } from '../../../utils/api';
+import { friendlyError } from '../../../utils/errors';
 
 const router = useRouter();
 
@@ -38,7 +39,7 @@ async function ajouterPlat() {
     price.value = null;
     imageUrl.value = '';
   } catch (e: any) {
-    error.value = e?.message || 'Erreur lors de l\'ajout du plat.';
+    error.value = friendlyError(e, 'Erreur lors de l\'ajout du plat.');
   } finally {
     loading.value = false;
   }

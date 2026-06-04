@@ -1,73 +1,80 @@
 import { FastifyInstance } from "fastify";
+import { Type } from "@sinclair/typebox";
 import { UserService } from "../../services/user.service.js";
-import { loggerDecorator } from "../../decorators/index.js";
 import {
   CreateUserSchema,
   UpdateUserSchema,
   UserResponseSchema,
 } from "../../schemas/user.schema.js";
+import { ErrorResponseSchema } from "../../schemas/error.schema.js";
 import type {
   UserRequest,
   UserUpdateRequest,
 } from "../../schemas/user.schema.js";
 
+const UserIdParamsSchema = Type.Object({ id: Type.String({ format: "uuid" }) });
+
 export const userRoutes = async (app: FastifyInstance) => {
   const userService = new UserService(app.prisma);
 
-  // GET /users - Récupérer tous les utilisateurs
+  // GET /users — ADMIN
   app.get(
     "/users",
     {
       preHandler: [app.authenticate, app.authorize(["ADMIN"])],
       schema: {
+        tags: ["users"],
+        summary: "Lister tous les utilisateurs (ADMIN)",
         response: {
-          200: {
-            type: "array",
-            items: UserResponseSchema,
-          },
+          200: Type.Array(UserResponseSchema),
+          401: ErrorResponseSchema,
+          403: ErrorResponseSchema,
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       const users = await userService.getAllUsers();
       return reply.send(users);
     },
   );
 
-  // GET /users/:id - Récupérer un utilisateur par ID
-  app.get(
+  // GET /users/:id — ADMIN
+  app.get<{ Params: { id: string } }>(
     "/users/:id",
     {
       preHandler: [app.authenticate, app.authorize(["ADMIN"])],
       schema: {
-        params: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-          },
-          required: ["id"],
-        },
+        tags: ["users"],
+        summary: "Récupérer un utilisateur par ID (ADMIN)",
+        params: UserIdParamsSchema,
         response: {
           200: UserResponseSchema,
+          401: ErrorResponseSchema,
+          403: ErrorResponseSchema,
+          404: ErrorResponseSchema,
         },
       },
     },
     async (request, reply) => {
-      const { id } = request.params as { id: string };
-      const user = await userService.getUserById(id);
+      const user = await userService.getUserById(request.params.id);
       return reply.send(user);
     },
   );
 
-  // POST /users - Créer un nouvel utilisateur
+  // POST /users — ADMIN
   app.post<{ Body: UserRequest }>(
     "/users",
     {
       preHandler: [app.authenticate, app.authorize(["ADMIN"])],
       schema: {
+        tags: ["users"],
+        summary: "Créer un utilisateur (ADMIN)",
         body: CreateUserSchema,
         response: {
           201: UserResponseSchema,
+          401: ErrorResponseSchema,
+          403: ErrorResponseSchema,
+          409: ErrorResponseSchema,
         },
       },
     },
@@ -77,29 +84,27 @@ export const userRoutes = async (app: FastifyInstance) => {
     },
   );
 
-  // PUT /users/:id - Mettre à jour un utilisateur
+  // PUT /users/:id — ADMIN
   app.put<{ Body: UserUpdateRequest; Params: { id: string } }>(
     "/users/:id",
     {
       preHandler: [app.authenticate, app.authorize(["ADMIN"])],
       schema: {
-        params: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-          },
-          required: ["id"],
-        },
+        tags: ["users"],
+        summary: "Mettre à jour un utilisateur (ADMIN)",
+        params: UserIdParamsSchema,
         body: UpdateUserSchema,
         response: {
           200: UserResponseSchema,
+          401: ErrorResponseSchema,
+          403: ErrorResponseSchema,
+          404: ErrorResponseSchema,
         },
       },
     },
     async (request, reply) => {
-      const { id } = request.params;
       const updatedUser = await userService.updateUser(
-        id,
+        request.params.id,
         request.user.id,
         request.body,
       );
@@ -107,27 +112,25 @@ export const userRoutes = async (app: FastifyInstance) => {
     },
   );
 
-  // DELETE /users/:id - Supprimer un utilisateur
-  app.delete(
+  // DELETE /users/:id — ADMIN
+  app.delete<{ Params: { id: string } }>(
     "/users/:id",
     {
       preHandler: [app.authenticate, app.authorize(["ADMIN"])],
       schema: {
-        params: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-          },
-          required: ["id"],
-        },
+        tags: ["users"],
+        summary: "Supprimer un utilisateur (ADMIN)",
+        params: UserIdParamsSchema,
         response: {
           200: UserResponseSchema,
+          401: ErrorResponseSchema,
+          403: ErrorResponseSchema,
+          404: ErrorResponseSchema,
         },
       },
     },
     async (request, reply) => {
-      const { id } = request.params as { id: string };
-      const deletedUser = await userService.deleteUser(id, request.user.id);
+      const deletedUser = await userService.deleteUser(request.params.id, request.user.id);
       return reply.send(deletedUser);
     },
   );

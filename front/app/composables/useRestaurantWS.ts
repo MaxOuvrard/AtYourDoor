@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useUserStore } from '../stores/userStore'
+import { useUserStore } from '../../stores/userStore'
 
 export type WSOrderNotif = {
   orderId: string
@@ -8,13 +8,19 @@ export type WSOrderNotif = {
   createdAt: string
 }
 
+function getWsUrl(): string {
+  // Forcer 127.0.0.1 pour éviter que Docker intercepte via ::1 (localhost)
+  const apiBase = process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:3000'
+  const wsBase = apiBase.replace(/^https?/, (p) => (p === 'https' ? 'wss' : 'ws'))
+  return `${wsBase}/ws/restaurant`
+}
+
 export function useRestaurantWS(onNewOrder: (notif: WSOrderNotif) => void) {
   const connected = ref(false)
   const wsError = ref('')
   let ws: WebSocket | null = null
   let pingInterval: ReturnType<typeof setInterval> | null = null
 
-  const config = useRuntimeConfig()
   const userStore = useUserStore()
 
   function connect() {
@@ -22,9 +28,7 @@ export function useRestaurantWS(onNewOrder: (notif: WSOrderNotif) => void) {
     const token = userStore.token
     if (!token) return
 
-    const apiBase = String(config.public.apiBase || 'http://localhost:3000')
-    const wsBase = apiBase.replace(/^https?/, (p) => (p === 'https' ? 'wss' : 'ws'))
-    const wsUrl = `${wsBase}/ws/restaurant`
+    const wsUrl = getWsUrl()
 
     try {
       ws = new WebSocket(wsUrl)

@@ -45,7 +45,7 @@ const filteredRestaurants = computed(() =>
 
 <template>
   <Header />
-  <div class="page">
+  <div class="page restaurants-page">
 
     <!-- Banner -->
     <div class="page-banner">
@@ -88,7 +88,7 @@ const filteredRestaurants = computed(() =>
       </p>
 
       <!-- Grid -->
-      <div v-if="filteredRestaurants.length > 0" class="card-grid">
+      <div v-if="filteredRestaurants.length > 0" class="resto-grid">
         <RestaurantItem
           v-for="restaurant in filteredRestaurants"
           :key="restaurant.id"
@@ -106,3 +106,43 @@ const filteredRestaurants = computed(() =>
     </div>
   </div>
 </template>
+
+<style scoped>
+.resto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.results-meta {
+  font-size: 0.85rem;
+  color: #90A4AE;
+  font-weight: 500;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 0;
+  color: #90A4AE;
+  text-align: center;
+}
+.empty-state h3 { font-size: 1.1rem; font-weight: 600; color: #607D8B; margin: 0; }
+.empty-state p  { font-size: 0.88rem; margin: 0; }
+.empty-state svg { opacity: 0.4; }
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff3f3;
+  border: 1px solid #ffcdd2;
+  color: #c62828;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+}
+</style>

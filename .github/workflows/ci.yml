@@ -13,6 +13,9 @@ env:
 
 jobs:
   test-and-build:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     defaults:
       run:
